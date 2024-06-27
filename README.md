@@ -2,7 +2,7 @@
 I was just having fun making a HUB for Roblox, now I'm making it for Universal (can be used in all games) and in the future I will add support for other games
 
 ## Features (Still W.I.P)
-###PLAYER (Universal)
+### PLAYER (Universal)
 
 WalkSpeed - Slider | Change the WalkSpeed value to up to 500
 JumpPower - Slider | Change the JumpPower value to up to 500
