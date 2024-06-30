@@ -7,7 +7,7 @@ I was just having fun making a HUB for Roblox, now I'm making it for Universal (
 - JUMP POWER - Slider | Change the JumpPower value to up to 500
 - ESP        - Toggle | ESP color will automatically change depending on the team color, and if there is no team the color will be white (default) There is a player health indicator that will change color smoothly depending on the player's health percentage
 - NO-CLIP    - Toggle | Toggle No-Clip (Hard W.I.P)
-- FLY        - Toggle | Toggle Fly (Hard W.I.P)
+- FLY        - Button | Button E to Fly (Hard W.I.P)
 
 ### MISC
 -
