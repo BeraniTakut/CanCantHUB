@@ -7,17 +7,111 @@ local Window = Library.CreateLib("CanCantHub | Universal (TESTING)", "DarkTheme"
 game:GetService("StarterGui"):SetCore("SendNotification", {Title = "CanCantHub | Universal (TESTING)", Text = "HUB by Gi"})
 
 -- Player Section
-local PlayerTab = Window:NewTab("Player")
-local PlayerSection = PlayerTab:NewSection("PLAYER")
+local PlayerTab = Window:NewTab("PLAYER")
+local MovementSection = PlayerTab:NewSection("MOVEMENT")
+local OtherSection = PlayerTab:NewSection("OTHER")
 
 -- WalkSpeed Slider
-PlayerSection:NewSlider("WalkSpeed", "Change WalkSpeed Value", 500, 16, function(Value)
+MovementSection:NewSlider("WALK SPEED", "Change WalkSpeed Value", 500, 16, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
 end)
 
 -- JumpPower Slider
-PlayerSection:NewSlider("JumpPower", "Change JumpPower Value", 500, 50, function(Value)
+MovementSection:NewSlider("JUMP POWER", "Change JumpPower Value", 500, 50, function(Value)
     game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+end)
+
+-- FLY
+local UIS = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local humanoid = character:WaitForChild("Humanoid")
+
+local flying = false
+local maxSpeed = 100
+local control = {f = 0, b = 0, l = 0, r = 0}
+local bg, bv
+local flyCoroutine
+
+local function createBodyGyro()
+    local bg = Instance.new("BodyGyro")
+    bg.P = 9e4
+    bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+    bg.cframe = humanoidRootPart.CFrame
+    bg.Parent = humanoidRootPart
+    return bg
+end
+
+local function createBodyVelocity()
+    local bv = Instance.new("BodyVelocity")
+    bv.velocity = Vector3.new(0, 0.1, 0)
+    bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+    bv.Parent = humanoidRootPart
+    return bv
+end
+
+local function startFlying()
+    humanoid.PlatformStand = true
+    bg = createBodyGyro()
+    bv = createBodyVelocity()
+end
+
+local function stopFlying()
+    humanoid.PlatformStand = false
+    if bg then bg:Destroy() end
+    if bv then bv:Destroy() end
+end
+
+local function flyLoop()
+    while flying do
+        local speed = maxSpeed
+        local moveVector = (game.Workspace.CurrentCamera.CFrame.lookVector * (control.f + control.b)) +
+                           ((game.Workspace.CurrentCamera.CFrame * CFrame.new(control.l + control.r, (control.f + control.b) * 0.2, 0).p) - game.Workspace.CurrentCamera.CFrame.p)
+        bv.velocity = moveVector * speed
+        bg.cframe = game.Workspace.CurrentCamera.CFrame * CFrame.Angles(-math.rad((control.f + control.b) * 50 * speed / maxSpeed), 0, 0)
+        wait()
+    end
+end
+
+OtherSection:NewToggle("FLY", "Toggle FLY On/Off", function(state)
+    if state then
+        flying = true
+        startFlying()
+        flyCoroutine = coroutine.create(flyLoop)
+        coroutine.resume(flyCoroutine)
+        StarterGui:SetCore("SendNotification", {Title = "FLY Enabled", Text = "Fly has been enabled"})
+    else
+        flying = false
+        stopFlying()
+        StarterGui:SetCore("SendNotification", {Title = "Fly Disabled", Text = "Fly has been disabled"})
+    end
+end)
+
+UIS.InputBegan:Connect(function(input, isProcessed)
+    if isProcessed then return end
+    if input.KeyCode == Enum.KeyCode.W then
+        control.f = 1
+    elseif input.KeyCode == Enum.KeyCode.S then
+        control.b = -1
+    elseif input.KeyCode == Enum.KeyCode.A then
+        control.l = -1
+    elseif input.KeyCode == Enum.KeyCode.D then
+        control.r = 1
+    end
+end)
+
+UIS.InputEnded:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.W then
+        control.f = 0
+    elseif input.KeyCode == Enum.KeyCode.S then
+        control.b = 0
+    elseif input.KeyCode == Enum.KeyCode.A then
+        control.l = 0
+    elseif input.KeyCode == Enum.KeyCode.D then
+        control.r = 0
+    end
 end)
 
 -- ESP
@@ -161,7 +255,7 @@ local function ToggleESP(state)
     end
 end
 
-PlayerSection:NewToggle("ESP", "Toggle ESP On/Off", ToggleESP)
+OtherSection:NewToggle("ESP", "Toggle ESP On/Off", ToggleESP)
 
 -- No-Clip
 local NOCLIP_ENABLED = false
@@ -197,7 +291,11 @@ local function ToggleNoClip(state)
     end
 end
 
-PlayerSection:NewToggle("No-Clip", "Toggle No-Clip On/Off", ToggleNoClip)
+OtherSection:NewToggle("NO-CLIP", "Toggle NO-CLIP On/Off", ToggleNoClip)
+
+-- MISC
+local MiscTab = Window:NewTab("Misc")
+local MiscSection = MiscTab:NewSection("MISC")
 
 -- Credits
 local CreditsTab = Window:NewTab("Credits")
