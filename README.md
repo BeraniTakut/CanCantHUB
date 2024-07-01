@@ -13,3 +13,8 @@ I was just having fun making a HUB for Roblox, now I'm making it for Universal (
   - Toggle On/Off No-Clip (Hard W.I.P)
 - FLY
   - Button E to On/Off Fly (Hard W.I.P)
+- AIM-BOT (Hard W.I.P)
+
+- Tested in game
+  - Unnamed Shooter
+  - Arsenal
