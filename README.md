@@ -15,6 +15,6 @@ I was just having fun making a HUB for Roblox, now I'm making it for Universal (
   - Button E to On/Off Fly (Hard W.I.P)
 - AIM-BOT (Hard W.I.P)
 
-- Tested in game
+- Tested Game
   - Unnamed Shooter
   - Arsenal
