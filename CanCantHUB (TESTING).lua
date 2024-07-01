@@ -23,7 +23,7 @@ MovementSection:NewSlider("JumpPower", "Change JumpPower Value", 500, 50, functi
 end)
 
 -- FLY
-OtherSection:NewButton("Fly", "Toggle ESP On/Off", function()
+OtherSection:NewButton("Fly", "Toggle FLY On/Off", function()
     local UIS = game:GetService("UserInputService")
     local StarterGui = game:GetService("StarterGui")
     local player = game.Players.LocalPlayer
@@ -76,6 +76,19 @@ OtherSection:NewButton("Fly", "Toggle ESP On/Off", function()
         end
     end
     
+    local function onCharacterAdded(char)
+        character = char
+        humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        humanoid = character:WaitForChild("Humanoid")
+        
+        if flying then
+            startFlying()
+            coroutine.wrap(flyLoop)()
+        end
+    end
+    
+    player.CharacterAdded:Connect(onCharacterAdded)
+    
     local mouse = player:GetMouse()
     
     mouse.KeyDown:Connect(function(key)
@@ -84,10 +97,10 @@ OtherSection:NewButton("Fly", "Toggle ESP On/Off", function()
             if flying then
                 startFlying()
                 coroutine.wrap(flyLoop)()
-                StarterGui:SetCore("SendNotification", {Title = "Fly Mode", Text = "Fly mode enabled"})
+                StarterGui:SetCore("SendNotification", {Title = "FLY", Text = "FLY has been Enabled"})
             else
                 stopFlying()
-                StarterGui:SetCore("SendNotification", {Title = "Fly Mode", Text = "Fly mode disabled"})
+                StarterGui:SetCore("SendNotification", {Title = "FLY", Text = "FLY has been Disabled"})
             end
         elseif key:lower() == "w" then
             control.f = 1
@@ -111,101 +124,125 @@ OtherSection:NewButton("Fly", "Toggle ESP On/Off", function()
             control.r = 0
         end
     end)
+    
+    if flying then
+        startFlying()
+        coroutine.wrap(flyLoop)()
+    end
 end)
 
 -- ESP
+-- Local player
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
+-- Konfigurasi
 local ESP_ENABLED = false
-local MAX_DISTANCE = 100000
-local NAME_POSITION = "Head"
+local MAX_DISTANCE = 100000 -- Jarak maksimum untuk menampilkan ESP
+local NAME_POSITION = "Feet" -- Posisi default untuk nama ("Head", "Center", "Feet")
 
+-- Fungsi untuk menentukan warna berdasarkan tim atau putih jika tidak ada tim
 local function GetTeamColor(Player)
     if Player.Team then
         return Player.Team.TeamColor.Color
     else
-        return Color3.new(1, 1, 1) -- Putih jika tidak ada tim
+        return Color3.new(1, 1, 1) -- Warna putih jika tidak ada tim
     end
 end
 
+-- Fungsi untuk membuat ESP
 local function CreateESP(Player)
-    local Highlight = Instance.new("Highlight")
-    Highlight.Adornee = Player.Character
-    Highlight.FillColor = GetTeamColor(Player)
-    Highlight.Parent = Player.Character
+    if Player.Character then
+        -- Buat Highlight untuk outline
+        local Highlight = Instance.new("Highlight")
+        Highlight.Adornee = Player.Character
+        Highlight.FillColor = Color3.new(0, 0, 0)
+        Highlight.OutlineColor = GetTeamColor(Player) -- Warna outline berdasarkan tim atau putih
+        Highlight.OutlineTransparency = 0
+        Highlight.FillTransparency = 1
+        Highlight.Parent = Player.Character
 
-    local BillboardGui = Instance.new("BillboardGui")
-    BillboardGui.Size = UDim2.new(0, 200, 0, 40)
-    BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
-    BillboardGui.AlwaysOnTop = true
-    BillboardGui.Name = "PlayerInfo"
+        -- Buat BillboardGui untuk nama dan darah
+        local BillboardGui = Instance.new("BillboardGui")
+        BillboardGui.Size = UDim2.new(0, 200, 0, 40) -- Ukuran tetap untuk teks, menyesuaikan dengan tambahan darah
+        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+        BillboardGui.AlwaysOnTop = true
+        BillboardGui.Name = "PlayerInfo"
 
-    local PositionOffset
-    if NAME_POSITION == "Center" then
-        PositionOffset = Vector3.new(0, -2, 0)
-    elseif NAME_POSITION == "Feet" then
-        PositionOffset = Vector3.new(0, -5, 0)
-    else
-        PositionOffset = Vector3.new(0, 2, 0)
-    end
+        local PositionOffset
+        if NAME_POSITION == "Center" then
+            PositionOffset = Vector3.new(0, -2, 0) -- Tengah pada karakter
+        elseif NAME_POSITION == "Feet" then
+            PositionOffset = Vector3.new(0, -5, 0) -- Di bawah kaki
+        else -- Default ke "Head"
+            PositionOffset = Vector3.new(0, 2, 0) -- Di atas kepala
+        end
 
-    local HealthLabel = Instance.new("TextLabel")
-    HealthLabel.Parent = BillboardGui
-    HealthLabel.Size = UDim2.new(1, 0, 0.5, 0)
-    HealthLabel.BackgroundTransparency = 1
-    HealthLabel.TextStrokeTransparency = 0
-    HealthLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    HealthLabel.TextScaled = false
-    HealthLabel.TextSize = 10
-    HealthLabel.Position = UDim2.new(0, 0, 0, 0)
-    HealthLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+        -- Buat TextLabel untuk angka darah
+        local HealthLabel = Instance.new("TextLabel")
+        HealthLabel.Parent = BillboardGui
+        HealthLabel.Size = UDim2.new(1, 0, 0.5, 0)
+        HealthLabel.BackgroundTransparency = 1
+        HealthLabel.TextStrokeTransparency = 0 -- Outline yang sepenuhnya terlihat
+        HealthLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Warna outline hitam
+        HealthLabel.TextScaled = false -- Ukuran teks tidak disesuaikan
+        HealthLabel.TextSize = 10 -- Ukuran teks lebih kecil dari sebelumnya
+        HealthLabel.Position = UDim2.new(0, 0, 0, 0) -- Di atas nama pemain
+        HealthLabel.TextYAlignment = Enum.TextYAlignment.Bottom -- Menyusun teks ke bawah
 
-    local NameLabel = Instance.new("TextLabel")
-    NameLabel.Parent = BillboardGui
-    NameLabel.Size = UDim2.new(1, 0, 0.5, 0)
-    NameLabel.BackgroundTransparency = 1
-    NameLabel.TextColor3 = GetTeamColor(Player)
-    NameLabel.TextStrokeTransparency = 0
-    NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
-    NameLabel.TextScaled = false
-    NameLabel.TextSize = 10
-    NameLabel.Position = UDim2.new(0, 0, 0.5, 0)
-    NameLabel.TextYAlignment = Enum.TextYAlignment.Top
-    NameLabel.Text = Player.Name
+        -- Buat TextLabel untuk nama pemain
+        local NameLabel = Instance.new("TextLabel")
+        NameLabel.Parent = BillboardGui
+        NameLabel.Size = UDim2.new(1, 0, 0.5, 0)
+        NameLabel.BackgroundTransparency = 1
+        NameLabel.TextColor3 = GetTeamColor(Player) -- Warna teks berdasarkan tim atau putih
+        NameLabel.TextStrokeTransparency = 0 -- Outline yang sepenuhnya terlihat
+        NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0) -- Warna outline hitam
+        NameLabel.TextScaled = false -- Ukuran teks tidak disesuaikan
+        NameLabel.TextSize = 10 -- Ukuran teks lebih kecil dari sebelumnya
+        NameLabel.Position = UDim2.new(0, 0, 0.5, 0) -- Di bawah angka darah
+        NameLabel.TextYAlignment = Enum.TextYAlignment.Top -- Menyusun teks ke atas
+        NameLabel.Text = Player.Name
 
-    local targetHealth = 100
-    local displayedHealth = 100
+        local targetHealth = 100
+        local displayedHealth = 100
 
-    local function UpdateHealth()
+        local function UpdateHealth()
+            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                targetHealth = Player.Character.Humanoid.Health
+            end
+        end
+
+        -- Update health saat script dibuat dan saat HealthChanged
+        UpdateHealth()
         if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            targetHealth = Player.Character.Humanoid.Health
+            Player.Character.Humanoid.HealthChanged:Connect(UpdateHealth)
         end
+
+        -- Fungsi untuk memperbarui teks dan warnanya secara halus
+        RunService.RenderStepped:Connect(function()
+            if ESP_ENABLED and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                displayedHealth = displayedHealth + (targetHealth - displayedHealth) * 0.1 -- Lerp
+
+                -- Interpolasi warna dari hijau ke merah
+                local healthRatio = displayedHealth / Player.Character.Humanoid.MaxHealth
+                local color = Color3.new(1 - healthRatio, healthRatio, 0) -- Merah ke hijau
+
+                HealthLabel.Text = "(" .. math.floor(displayedHealth) .. ")"
+                HealthLabel.TextColor3 = color
+            end
+        end)
+
+        BillboardGui.Adornee = Player.Character:FindFirstChild(NAME_POSITION) or Player.Character.PrimaryPart
+        BillboardGui.StudsOffset = PositionOffset
+        BillboardGui.Parent = Player.Character
     end
-
-    UpdateHealth()
-    if Player.Character and Player.Character:FindFirstChild("Humanoid") then
-        Player.Character.Humanoid.HealthChanged:Connect(UpdateHealth)
-    end
-
-    RunService.RenderStepped:Connect(function()
-        if ESP_ENABLED and Player.Character and Player.Character:FindFirstChild("Humanoid") then
-            displayedHealth = displayedHealth + (targetHealth - displayedHealth) * 0.1
-
-            local healthRatio = displayedHealth / Player.Character.Humanoid.MaxHealth
-            local color = Color3.new(1 - healthRatio, healthRatio, 0)
-
-            HealthLabel.Text = "(" .. math.floor(displayedHealth) .. ")"
-            HealthLabel.TextColor3 = color
-        end
-    end)
-
-    BillboardGui.Adornee = Player.Character:FindFirstChild(NAME_POSITION) or Player.Character.PrimaryPart
-    BillboardGui.StudsOffset = PositionOffset
-    BillboardGui.Parent = Player.Character
 end
 
+-- Fungsi untuk memperbarui ESP
 local function UpdateESP()
     for _, Player in pairs(Players:GetPlayers()) do
         if Player ~= LocalPlayer and Player.Character then
@@ -228,18 +265,14 @@ local function UpdateESP()
     end
 end
 
-RunService.RenderStepped:Connect(function()
-    if ESP_ENABLED then
-        UpdateESP()
-    end
-end)
-
+-- Fungsi untuk mengaktifkan atau menonaktifkan ESP
 local function ToggleESP(state)
     ESP_ENABLED = state
     if ESP_ENABLED then
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title = "ESP Enabled", Text = "ESP has been enabled."})
+        StarterGui:SetCore("SendNotification", {Title = "ESP", Text = "ESP has been Enabled"})
     else
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title = "ESP Disabled", Text = "ESP has been disabled."})
+        StarterGui:SetCore("SendNotification", {Title = "ESP", Text = "ESP has been Disabled"})
+        -- Hapus semua ESP yang ada
         for _, Player in pairs(Players:GetPlayers()) do
             if Player ~= LocalPlayer and Player.Character then
                 local Character = Player.Character
@@ -254,39 +287,69 @@ local function ToggleESP(state)
     end
 end
 
-OtherSection:NewToggle("ESP", "Toggle ESP On/Off", ToggleESP)
+-- Memperbarui ESP setiap frame
+RunService.RenderStepped:Connect(function()
+    if ESP_ENABLED then
+        UpdateESP()
+    end
+end)
+
+-- Implementasi toggle dengan Section:NewToggle
+OtherSection:NewToggle("ESP", "Toggle ESP On/Off", function(state)
+    ToggleESP(state)
+    if state then
+        print("ESP On")
+    else
+        print("ESP Off")
+    end
+end)
 
 -- No-Clip
 local NOCLIP_ENABLED = false
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+local noclipConnection
+
+local function Notify(title, text)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 3
+    })
+end
+
+local function SetNoClip(state)
+    if not LocalPlayer.Character or not LocalPlayer.Character.Parent then return end
+    
+    for _, part in ipairs(LocalPlayer.Character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = not state
+        end
+    end
+end
+
+local function NoClipLoop()
+    if NOCLIP_ENABLED then
+        SetNoClip(true)
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            SetNoClip(false)
+        end
+    end
+end
 
 local function ToggleNoClip(state)
     NOCLIP_ENABLED = state
     if NOCLIP_ENABLED then
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title = "No-Clip Enabled", Text = "No-Clip has been enabled."})
-        local player = game.Players.LocalPlayer
-        local event
-
-        function noclipLoop()
-            if NOCLIP_ENABLED then
-                for _,v in pairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false
-                    end
-                end
-            else
-                event:Disconnect()
-                for _,v in pairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = true
-                    end
-                end
-            end
-        end
-
-        event = game:GetService("RunService").Stepped:Connect(noclipLoop)
+        Notify("No-Clip Enabled", "No-Clip has been Enabled.")
+        noclipConnection = RunService.Stepped:Connect(NoClipLoop)
     else
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title = "No-Clip Disabled", Text = "No-Clip has been disabled."})
-        NOCLIP_ENABLED = false
+        Notify("No-Clip Disabled", "No-Clip has been Disabled.")
+        NoClipLoop()
     end
 end
 
