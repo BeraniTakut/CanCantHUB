@@ -18,4 +18,4 @@
 
 ### Tested Executors
 - [x] Wave
-- [ ] Solara
+- [x] Solara
