@@ -1,0 +1,21 @@
+# CanCantHUB (TESTING)
+## DISCLAIMER: For fun, and sorry if it harms you.
+
+## AIO (All In One)
+`loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/AIO"))()`
+
+### List Games
+- [x] Unnamed Shooter (TESTING)
+- [x] [FPS] Gun Grounds FFA (TESTING)
+- **More Coming Soon...**
+
+### Features
+- **Check it yourself :)**
+
+### Tested Devices
+- [x] Windows
+- [ ] Mobile
+
+### Tested Executors
+- [x] Wave
+- [ ] Solara
