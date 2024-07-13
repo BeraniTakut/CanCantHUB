@@ -6,6 +6,8 @@
 
 ### List Games
 - [x] Unnamed Shooter (TESTING)
+  - [x] Normal
+  - [x] Duel Only
 - [x] [FPS] Gun Grounds FFA (TESTING)
 - **More Coming Soon...**
 
