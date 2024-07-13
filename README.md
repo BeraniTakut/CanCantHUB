@@ -2,7 +2,7 @@
 ## DISCLAIMER: For fun, and sorry if it harms you.
 
 ## AIO (All In One)
-`loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/AIO"))()`
+`loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/games/AIO"))()`
 
 ### List Games
 - [x] Unnamed Shooter (TESTING)
