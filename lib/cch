@@ -1,6 +1,44 @@
 local Library = {}
 Library.__index = Library
 
+local UIS = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            update(input)
+        end
+    end)
+end
+
 function Library:CreateWindow(title)
     local window = {}
     window.Tabs = {}
@@ -11,8 +49,7 @@ function Library:CreateWindow(title)
     window.MainFrame = Instance.new("Frame")
     window.MainFrame.Size = UDim2.new(0.3, 0, 0.5, 0)
     window.MainFrame.Position = UDim2.new(0.35, 0, 0.25, 0)
-    window.MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    window.MainFrame.BackgroundTransparency = 0.1
+    window.MainFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     window.MainFrame.BorderSizePixel = 0
     window.MainFrame.Parent = window.ScreenGui
 
@@ -20,15 +57,71 @@ function Library:CreateWindow(title)
     window.UICorner.CornerRadius = UDim.new(0, 10)
     window.UICorner.Parent = window.MainFrame
 
+    window.TitleBar = Instance.new("Frame")
+    window.TitleBar.Size = UDim2.new(1, 0, 0.1, 0)
+    window.TitleBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    window.TitleBar.BorderSizePixel = 0
+    window.TitleBar.Parent = window.MainFrame
+
     window.Title = Instance.new("TextLabel")
-    window.Title.Size = UDim2.new(1, 0, 0.1, 0)
+    window.Title.Size = UDim2.new(1, -60, 1, 0)
     window.Title.Position = UDim2.new(0, 0, 0, 0)
     window.Title.Text = title
     window.Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     window.Title.BackgroundTransparency = 1
     window.Title.Font = Enum.Font.GothamBold
-    window.Title.TextSize = 24
-    window.Title.Parent = window.MainFrame
+    window.Title.TextSize = 18
+    window.Title.Parent = window.TitleBar
+
+    window.MinimizeButton = Instance.new("TextButton")
+    window.MinimizeButton.Size = UDim2.new(0, 30, 1, 0)
+    window.MinimizeButton.Position = UDim2.new(1, -60, 0, 0)
+    window.MinimizeButton.Text = "-"
+    window.MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    window.MinimizeButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    window.MinimizeButton.BorderSizePixel = 0
+    window.MinimizeButton.Font = Enum.Font.GothamBold
+    window.MinimizeButton.TextSize = 18
+    window.MinimizeButton.Parent = window.TitleBar
+
+    window.CloseButton = Instance.new("TextButton")
+    window.CloseButton.Size = UDim2.new(0, 30, 1, 0)
+    window.CloseButton.Position = UDim2.new(1, -30, 0, 0)
+    window.CloseButton.Text = "X"
+    window.CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    window.CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    window.CloseButton.BorderSizePixel = 0
+    window.CloseButton.Font = Enum.Font.GothamBold
+    window.CloseButton.TextSize = 18
+    window.CloseButton.Parent = window.TitleBar
+
+    window.ContentFrame = Instance.new("Frame")
+    window.ContentFrame.Size = UDim2.new(1, 0, 0.9, 0)
+    window.ContentFrame.Position = UDim2.new(0, 0, 0.1, 0)
+    window.ContentFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    window.ContentFrame.BorderSizePixel = 0
+    window.ContentFrame.Parent = window.MainFrame
+
+    window.UICornerContent = Instance.new("UICorner")
+    window.UICornerContent.CornerRadius = UDim.new(0, 10)
+    window.UICornerContent.Parent = window.ContentFrame
+
+    window.Minimized = false
+
+    window.MinimizeButton.MouseButton1Click:Connect(function()
+        window.Minimized = not window.Minimized
+        if window.Minimized then
+            TweenService:Create(window.ContentFrame, TweenInfo.new(0.5), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+        else
+            TweenService:Create(window.ContentFrame, TweenInfo.new(0.5), {Size = UDim2.new(1, 0, 0.9, 0)}):Play()
+        end
+    end)
+
+    window.CloseButton.MouseButton1Click:Connect(function()
+        window.ScreenGui:Destroy()
+    end)
+
+    makeDraggable(window.TitleBar)
 
     setmetatable(window, self)
     return window
@@ -46,15 +139,33 @@ function Library:CreateTab(name)
     tab.ColorPickers = {}
 
     tab.TabButton = Instance.new("TextButton")
-    tab.TabButton.Size = UDim2.new(0.1, 0, 0.1, 0)
-    tab.TabButton.Position = UDim2.new(#self.Tabs * 0.1, 0, 0.1, 0)
+    tab.TabButton.Size = UDim2.new(0.2, 0, 0.1, 0)
+    tab.TabButton.Position = UDim2.new(#self.Tabs * 0.2, 0, 0, 0)
     tab.TabButton.Text = name
     tab.TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    tab.TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    tab.TabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     tab.TabButton.BorderSizePixel = 0
     tab.TabButton.Font = Enum.Font.GothamBold
     tab.TabButton.TextSize = 14
-    tab.TabButton.Parent = self.MainFrame
+    tab.TabButton.Parent = self.ContentFrame
+
+    tab.Content = Instance.new("Frame")
+    tab.Content.Size = UDim2.new(1, 0, 0.9, 0)
+    tab.Content.Position = UDim2.new(0, 0, 0.1, 0)
+    tab.Content.BackgroundTransparency = 1
+    tab.Content.Visible = false
+    tab.Content.Parent = self.ContentFrame
+
+    tab.TabButton.MouseButton1Click:Connect(function()
+        for _, t in ipairs(self.Tabs) do
+            t.Content.Visible = false
+        end
+        tab.Content.Visible = true
+    end)
+
+    if #self.Tabs == 0 then
+        tab.Content.Visible = true
+    end
 
     table.insert(self.Tabs, tab)
     return tab
@@ -66,14 +177,14 @@ function Library:CreateButton(tab, name, callback)
 
     button.Button = Instance.new("TextButton")
     button.Button.Size = UDim2.new(0.8, 0, 0.1, 0)
-    button.Button.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.2, 0)
+    button.Button.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.02, 0)
     button.Button.Text = name
     button.Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     button.Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     button.Button.BorderSizePixel = 0
     button.Button.Font = Enum.Font.GothamBold
     button.Button.TextSize = 14
-    button.Button.Parent = self.MainFrame
+    button.Button.Parent = tab.Content
 
     button.Button.MouseButton1Click:Connect(callback)
 
@@ -88,19 +199,19 @@ function Library:CreateToggle(tab, name, callback)
 
     toggle.Button = Instance.new("TextButton")
     toggle.Button.Size = UDim2.new(0.8, 0, 0.1, 0)
-    toggle.Button.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.2, 0)
-    toggle.Button.Text = name
+    toggle.Button.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.02, 0)
+    toggle.Button.Text = name .. " [OFF]"
     toggle.Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     toggle.Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     toggle.Button.BorderSizePixel = 0
     toggle.Button.Font = Enum.Font.GothamBold
     toggle.Button.TextSize = 14
-    toggle.Button.Parent = self.MainFrame
+    toggle.Button.Parent = tab.Content
 
     toggle.Button.MouseButton1Click:Connect(function()
         toggle.State = not toggle.State
-        callback(toggle.State)
         toggle.Button.Text = name .. (toggle.State and " [ON]" or " [OFF]")
+        callback(toggle.State)
     end)
 
     table.insert(tab.Toggles, toggle)
@@ -113,24 +224,25 @@ function Library:CreateTextbox(tab, name, callback)
 
     textbox.TextLabel = Instance.new("TextLabel")
     textbox.TextLabel.Size = UDim2.new(0.8, 0, 0.1, 0)
-    textbox.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.2, 0)
+    textbox.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.02, 0)
     textbox.TextLabel.Text = name
     textbox.TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     textbox.TextLabel.BackgroundTransparency = 1
     textbox.TextLabel.Font = Enum.Font.GothamBold
     textbox.TextLabel.TextSize = 14
-    textbox.TextLabel.Parent = self.MainFrame
+    textbox.TextLabel.Parent = tab.Content
 
     textbox.TextBox = Instance.new("TextBox")
     textbox.TextBox.Size = UDim2.new(0.8, 0, 0.1, 0)
-    textbox.TextBox.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.32, 0)
+    textbox.TextBox.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.14, 0)
     textbox.TextBox.Text = ""
     textbox.TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
     textbox.TextBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     textbox.TextBox.BorderSizePixel = 0
     textbox.TextBox.Font = Enum.Font.Gotham
     textbox.TextBox.TextSize = 14
-    textbox.TextBox.Parent = self.MainFrame
+    textbox.TextBox.ClearTextOnFocus = false
+    textbox.TextBox.Parent = tab.Content
 
     textbox.TextBox.FocusLost:Connect(function(enterPressed)
         if enterPressed then
@@ -149,32 +261,32 @@ function Library:CreateDropdown(tab, name, options, callback)
 
     dropdown.TextLabel = Instance.new("TextLabel")
     dropdown.TextLabel.Size = UDim2.new(0.8, 0, 0.1, 0)
-    dropdown.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.2, 0)
+    dropdown.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.02, 0)
     dropdown.TextLabel.Text = name
     dropdown.TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     dropdown.TextLabel.BackgroundTransparency = 1
     dropdown.TextLabel.Font = Enum.Font.GothamBold
     dropdown.TextLabel.TextSize = 14
-    dropdown.TextLabel.Parent = self.MainFrame
+    dropdown.TextLabel.Parent = tab.Content
 
     dropdown.Selected = Instance.new("TextButton")
     dropdown.Selected.Size = UDim2.new(0.8, 0, 0.1, 0)
-    dropdown.Selected.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.32, 0)
+    dropdown.Selected.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.14, 0)
     dropdown.Selected.Text = options[1]
     dropdown.Selected.TextColor3 = Color3.fromRGB(255, 255, 255)
     dropdown.Selected.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     dropdown.Selected.BorderSizePixel = 0
     dropdown.Selected.Font = Enum.Font.Gotham
     dropdown.Selected.TextSize = 14
-    dropdown.Selected.Parent = self.MainFrame
+    dropdown.Selected.Parent = tab.Content
 
     dropdown.Frame = Instance.new("Frame")
     dropdown.Frame.Size = UDim2.new(0.8, 0, 0.1 * #options, 0)
-    dropdown.Frame.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.42, 0)
+    dropdown.Frame.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.26, 0)
     dropdown.Frame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     dropdown.Frame.BorderSizePixel = 0
     dropdown.Frame.Visible = false
-    dropdown.Frame.Parent = self.MainFrame
+    dropdown.Frame.Parent = tab.Content
 
     for i, option in ipairs(options) do
         local button = Instance.new("TextButton")
@@ -212,20 +324,20 @@ function Library:CreateSlider(tab, name, min, max, callback)
 
     slider.TextLabel = Instance.new("TextLabel")
     slider.TextLabel.Size = UDim2.new(0.8, 0, 0.1, 0)
-    slider.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.2, 0)
+    slider.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.02, 0)
     slider.TextLabel.Text = name
     slider.TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     slider.TextLabel.BackgroundTransparency = 1
     slider.TextLabel.Font = Enum.Font.GothamBold
     slider.TextLabel.TextSize = 14
-    slider.TextLabel.Parent = self.MainFrame
+    slider.TextLabel.Parent = tab.Content
 
     slider.SliderFrame = Instance.new("Frame")
     slider.SliderFrame.Size = UDim2.new(0.8, 0, 0.1, 0)
-    slider.SliderFrame.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.32, 0)
+    slider.SliderFrame.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.14, 0)
     slider.SliderFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     slider.SliderFrame.BorderSizePixel = 0
-    slider.SliderFrame.Parent = self.MainFrame
+    slider.SliderFrame.Parent = tab.Content
 
     slider.Slider = Instance.new("Frame")
     slider.Slider.Size = UDim2.new(0, 0, 1, 0)
@@ -263,14 +375,14 @@ function Library:CreateKeybind(tab, name, defaultKey, callback)
 
     keybind.Button = Instance.new("TextButton")
     keybind.Button.Size = UDim2.new(0.8, 0, 0.1, 0)
-    keybind.Button.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.2, 0)
+    keybind.Button.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.02, 0)
     keybind.Button.Text = name .. " [" .. tostring(defaultKey) .. "]"
     keybind.Button.TextColor3 = Color3.fromRGB(255, 255, 255)
     keybind.Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
     keybind.Button.BorderSizePixel = 0
     keybind.Button.Font = Enum.Font.GothamBold
     keybind.Button.TextSize = 14
-    keybind.Button.Parent = self.MainFrame
+    keybind.Button.Parent = tab.Content
 
     keybind.Button.MouseButton1Click:Connect(function()
         keybind.Button.Text = name .. " [Press any key]"
@@ -301,29 +413,29 @@ function Library:CreateColorPicker(tab, name, defaultColor, callback)
 
     colorPicker.TextLabel = Instance.new("TextLabel")
     colorPicker.TextLabel.Size = UDim2.new(0.8, 0, 0.1, 0)
-    colorPicker.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.2, 0)
+    colorPicker.TextLabel.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.02, 0)
     colorPicker.TextLabel.Text = name
     colorPicker.TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     colorPicker.TextLabel.BackgroundTransparency = 1
     colorPicker.TextLabel.Font = Enum.Font.GothamBold
     colorPicker.TextLabel.TextSize = 14
-    colorPicker.TextLabel.Parent = self.MainFrame
+    colorPicker.TextLabel.Parent = tab.Content
 
     colorPicker.ColorDisplay = Instance.new("TextButton")
     colorPicker.ColorDisplay.Size = UDim2.new(0.8, 0, 0.1, 0)
-    colorPicker.ColorDisplay.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.32, 0)
+    colorPicker.ColorDisplay.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.14, 0)
     colorPicker.ColorDisplay.Text = ""
     colorPicker.ColorDisplay.BackgroundColor3 = defaultColor
     colorPicker.ColorDisplay.BorderSizePixel = 0
-    colorPicker.ColorDisplay.Parent = self.MainFrame
+    colorPicker.ColorDisplay.Parent = tab.Content
 
     colorPicker.ColorDisplay.MouseButton1Click:Connect(function()
         local colorPickerFrame = Instance.new("Frame")
         colorPickerFrame.Size = UDim2.new(0.8, 0, 0.4, 0)
-        colorPickerFrame.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.42, 0)
+        colorPickerFrame.Position = UDim2.new(0.1, 0, (#tab.Buttons + #tab.Toggles + #tab.Textboxes + #tab.Dropdowns + #tab.Sliders + #tab.Keybinds + #tab.ColorPickers) * 0.12 + 0.26, 0)
         colorPickerFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
         colorPickerFrame.BorderSizePixel = 0
-        colorPickerFrame.Parent = self.MainFrame
+        colorPickerFrame.Parent = tab.Content
 
         local colorPickerCloseButton = Instance.new("TextButton")
         colorPickerCloseButton.Size = UDim2.new(1, 0, 0.1, 0)
