@@ -4,6 +4,7 @@ local Library = {}
 function Library:Create(options)
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
+    local TitleBar = Instance.new("TextLabel")
 
     ScreenGui.Name = options.Name or "CustomLibrary"
     ScreenGui.Parent = game.CoreGui
@@ -12,7 +13,7 @@ function Library:Create(options)
     MainFrame.Parent = ScreenGui
     MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     MainFrame.BorderSizePixel = 0
-    MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+    MainFrame.Position = UDim2.new(0.5, -options.Size.X.Offset / 2, 0.5, -options.Size.Y.Offset / 2)
     MainFrame.Size = options.Size or UDim2.new(0, 600, 0, 400)
     MainFrame.ClipsDescendants = true
     MainFrame.Draggable = true
@@ -22,6 +23,21 @@ function Library:Create(options)
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MainFrame
+
+    TitleBar.Name = "TitleBar"
+    TitleBar.Parent = MainFrame
+    TitleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    TitleBar.Size = UDim2.new(1, 0, 0, 40)
+    TitleBar.Font = Enum.Font.SourceSans
+    TitleBar.Text = options.Name or "Custom GUI"
+    TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TitleBar.TextSize = 20
+    TitleBar.TextWrapped = true
+    TitleBar.Draggable = true
+
+    local TitleBarCorner = Instance.new("UICorner")
+    TitleBarCorner.CornerRadius = UDim.new(0, 10)
+    TitleBarCorner.Parent = TitleBar
 
     return {
         ScreenGui = ScreenGui,
