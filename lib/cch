@@ -109,6 +109,15 @@ function Library:CreateWindow(title)
     window.UICornerContent.CornerRadius = UDim.new(0, 10)
     window.UICornerContent.Parent = window.ContentFrame
 
+    window.TabFrame = Instance.new("ScrollingFrame")
+    window.TabFrame.Size = UDim2.new(1, 0, 0.1, 0)
+    window.TabFrame.Position = UDim2.new(0, 0, 0, 0)
+    window.TabFrame.BackgroundTransparency = 1
+    window.TabFrame.BorderSizePixel = 0
+    window.TabFrame.CanvasSize = UDim2.new(1, 0, 0, 0)
+    window.TabFrame.ScrollBarThickness = 5
+    window.TabFrame.Parent = window.TitleBar
+
     window.Minimized = false
 
     window.MinimizeButton.MouseButton1Click:Connect(function()
@@ -142,15 +151,14 @@ function Library:CreateTab(name)
     tab.ColorPickers = {}
 
     tab.TabButton = Instance.new("TextButton")
-    tab.TabButton.Size = UDim2.new(0.2, 0, 0.1, 0)
-    tab.TabButton.Position = UDim2.new(#self.Tabs * 0.2, 0, 0, 0)
+    tab.TabButton.Size = UDim2.new(0, 100, 1, 0)
     tab.TabButton.Text = name
     tab.TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     tab.TabButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     tab.TabButton.BorderSizePixel = 0
     tab.TabButton.Font = Enum.Font.GothamBold
     tab.TabButton.TextSize = 14
-    tab.TabButton.Parent = self.ContentFrame
+    tab.TabButton.Parent = self.TabFrame
 
     tab.Content = Instance.new("Frame")
     tab.Content.Size = UDim2.new(1, 0, 0.9, 0)
@@ -171,6 +179,7 @@ function Library:CreateTab(name)
     end
 
     table.insert(self.Tabs, tab)
+    self.TabFrame.CanvasSize = UDim2.new(0, 100 * #self.Tabs, 0, 0)
     return tab
 end
 
