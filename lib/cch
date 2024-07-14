@@ -1,4 +1,3 @@
--- GUI Library
 local Library = {}
 Library.__index = Library
 
