@@ -1,1 +1,407 @@
+local Library = {}
 
+-- Create the main GUI frame
+function Library:CreateMainFrame()
+    local ScreenGui = Instance.new("ScreenGui")
+    local MainFrame = Instance.new("Frame")
+
+    ScreenGui.Name = "CustomLibrary"
+    ScreenGui.Parent = game.CoreGui
+
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = ScreenGui
+    MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    MainFrame.BorderSizePixel = 0
+    MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
+    MainFrame.Size = UDim2.new(0, 600, 0, 400)
+    MainFrame.ClipsDescendants = true
+    MainFrame.Draggable = true
+    MainFrame.Active = true
+    MainFrame.Selectable = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = MainFrame
+
+    return ScreenGui, MainFrame
+end
+
+-- Add browser-like navigation tabs
+function Library:CreateTab(Frame, TabName)
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = TabName
+    TabButton.Parent = Frame
+    TabButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    TabButton.Size = UDim2.new(0, 100, 0, 40)
+    TabButton.Font = Enum.Font.SourceSans
+    TabButton.Text = TabName
+    TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TabButton.TextSize = 14
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = TabButton
+
+    return TabButton
+end
+
+-- Add buttons
+function Library:CreateButton(Frame, ButtonText, Callback)
+    local Button = Instance.new("TextButton")
+    Button.Parent = Frame
+    Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    Button.Size = UDim2.new(0, 200, 0, 50)
+    Button.Font = Enum.Font.SourceSans
+    Button.Text = ButtonText
+    Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Button.TextSize = 18
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = Button
+
+    Button.MouseButton1Click:Connect(function()
+        Callback()
+    end)
+
+    return Button
+end
+
+-- Add sliders
+function Library:CreateSlider(Frame, SliderText, Min, Max, Default, Callback)
+    local SliderFrame = Instance.new("Frame")
+    local SliderLabel = Instance.new("TextLabel")
+    local Slider = Instance.new("TextButton")
+    local ValueLabel = Instance.new("TextLabel")
+
+    SliderFrame.Name = "SliderFrame"
+    SliderFrame.Parent = Frame
+    SliderFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    SliderFrame.Size = UDim2.new(0, 200, 0, 50)
+
+    SliderLabel.Name = "SliderLabel"
+    SliderLabel.Parent = SliderFrame
+    SliderLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    SliderLabel.BackgroundTransparency = 1
+    SliderLabel.Position = UDim2.new(0, 5, 0, 0)
+    SliderLabel.Size = UDim2.new(0, 100, 0, 50)
+    SliderLabel.Font = Enum.Font.SourceSans
+    SliderLabel.Text = SliderText
+    SliderLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SliderLabel.TextSize = 18
+
+    Slider.Name = "Slider"
+    Slider.Parent = SliderFrame
+    Slider.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    Slider.Position = UDim2.new(0, 110, 0.5, -10)
+    Slider.Size = UDim2.new(0, 80, 0, 20)
+    Slider.Font = Enum.Font.SourceSans
+    Slider.Text = ""
+    Slider.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Slider.TextSize = 14
+    Slider.AutoButtonColor = false
+
+    ValueLabel.Name = "ValueLabel"
+    ValueLabel.Parent = SliderFrame
+    ValueLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    ValueLabel.BackgroundTransparency = 1
+    ValueLabel.Position = UDim2.new(0, 150, 0, 0)
+    ValueLabel.Size = UDim2.new(0, 50, 0, 50)
+    ValueLabel.Font = Enum.Font.SourceSans
+    ValueLabel.Text = tostring(Default)
+    ValueLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ValueLabel.TextSize = 18
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = SliderFrame
+
+    local dragging = false
+
+    Slider.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+        end
+    end)
+
+    Slider.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mouseX = input.Position.X
+            local framePos = SliderFrame.AbsolutePosition.X
+            local frameSize = SliderFrame.AbsoluteSize.X
+            local newPos = math.clamp((mouseX - framePos) / frameSize, 0, 1)
+            Slider.Position = UDim2.new(newPos, -10, 0.5, -10)
+            local value = math.floor(Min + (Max - Min) * newPos)
+            ValueLabel.Text = tostring(value)
+            Callback(value)
+        end
+    end)
+
+    return SliderFrame
+end
+
+-- Add dropdowns
+function Library:CreateDropdown(Frame, DropdownText, Options, Callback)
+    local DropdownFrame = Instance.new("Frame")
+    local DropdownLabel = Instance.new("TextLabel")
+    local DropdownButton = Instance.new("TextButton")
+    local OptionFrame = Instance.new("Frame")
+
+    DropdownFrame.Name = "DropdownFrame"
+    DropdownFrame.Parent = Frame
+    DropdownFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    DropdownFrame.Size = UDim2.new(0, 200, 0, 50)
+
+    DropdownLabel.Name = "DropdownLabel"
+    DropdownLabel.Parent = DropdownFrame
+    DropdownLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownLabel.BackgroundTransparency = 1
+    DropdownLabel.Position = UDim2.new(0, 5, 0, 0)
+    DropdownLabel.Size = UDim2.new(0, 100, 0, 50)
+    DropdownLabel.Font = Enum.Font.SourceSans
+    DropdownLabel.Text = DropdownText
+    DropdownLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownLabel.TextSize = 18
+
+    DropdownButton.Name = "DropdownButton"
+    DropdownButton.Parent = DropdownFrame
+    DropdownButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    DropdownButton.Position = UDim2.new(0, 110, 0.5, -10)
+    DropdownButton.Size = UDim2.new(0, 80, 0, 20)
+    DropdownButton.Font = Enum.Font.SourceSans
+    DropdownButton.Text = "Select"
+    DropdownButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    DropdownButton.TextSize = 14
+
+    OptionFrame.Name = "OptionFrame"
+    OptionFrame.Parent = DropdownFrame
+    OptionFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    OptionFrame.Position = UDim2.new(0, 0, 1, 0)
+    OptionFrame.Size = UDim2.new(1, 0, 0, #Options * 25)
+    OptionFrame.Visible = false
+    OptionFrame.ClipsDescendants = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = DropdownFrame
+
+    DropdownButton.MouseButton1Click:Connect(function()
+        OptionFrame.Visible = not OptionFrame.Visible
+    end)
+
+    for i, option in ipairs(Options) do
+        local OptionButton = Instance.new("TextButton")
+        OptionButton.Name = option
+        OptionButton.Parent = OptionFrame
+        OptionButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        OptionButton.Size = UDim2.new(1, 0, 0, 25)
+        OptionButton.Font = Enum.Font.SourceSans
+        OptionButton.Text = option
+        OptionButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        OptionButton.TextSize = 14
+
+        OptionButton.MouseButton1Click:Connect(function()
+            DropdownButton.Text = option
+            OptionFrame.Visible = false
+            Callback(option)
+        end)
+    end
+
+    return DropdownFrame
+end
+
+-- Add inputs
+function Library:CreateInput(Frame, InputText, Callback)
+    local InputFrame = Instance.new("Frame")
+    local InputLabel = Instance.new("TextLabel")
+    local InputBox = Instance.new("TextBox")
+
+    InputFrame.Name = "InputFrame"
+    InputFrame.Parent = Frame
+    InputFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    InputFrame.Size = UDim2.new(0, 200, 0, 50)
+
+    InputLabel.Name = "InputLabel"
+    InputLabel.Parent = InputFrame
+    InputLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    InputLabel.BackgroundTransparency = 1
+    InputLabel.Position = UDim2.new(0, 5, 0, 0)
+    InputLabel.Size = UDim2.new(0, 100, 0, 50)
+    InputLabel.Font = Enum.Font.SourceSans
+    InputLabel.Text = InputText
+    InputLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    InputLabel.TextSize = 18
+
+    InputBox.Name = "InputBox"
+    InputBox.Parent = InputFrame
+    InputBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    InputBox.Position = UDim2.new(0, 110, 0.5, -10)
+    InputBox.Size = UDim2.new(0, 80, 0, 20)
+    InputBox.Font = Enum.Font.SourceSans
+    InputBox.Text = ""
+    InputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    InputBox.TextSize = 14
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = InputFrame
+
+    InputBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            Callback(InputBox.Text)
+        end
+    end)
+
+    return InputFrame
+end
+
+-- Add color pickers
+function Library:CreateColorPicker(Frame, PickerText, DefaultColor, Callback)
+    local PickerFrame = Instance.new("Frame")
+    local PickerLabel = Instance.new("TextLabel")
+    local PickerButton = Instance.new("TextButton")
+
+    PickerFrame.Name = "PickerFrame"
+    PickerFrame.Parent = Frame
+    PickerFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    PickerFrame.Size = UDim2.new(0, 200, 0, 50)
+
+    PickerLabel.Name = "PickerLabel"
+    PickerLabel.Parent = PickerFrame
+    PickerLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    PickerLabel.BackgroundTransparency = 1
+    PickerLabel.Position = UDim2.new(0, 5, 0, 0)
+    PickerLabel.Size = UDim2.new(0, 100, 0, 50)
+    PickerLabel.Font = Enum.Font.SourceSans
+    PickerLabel.Text = PickerText
+    PickerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PickerLabel.TextSize = 18
+
+    PickerButton.Name = "PickerButton"
+    PickerButton.Parent = PickerFrame
+    PickerButton.BackgroundColor3 = DefaultColor
+    PickerButton.Position = UDim2.new(0, 110, 0.5, -10)
+    PickerButton.Size = UDim2.new(0, 80, 0, 20)
+    PickerButton.Font = Enum.Font.SourceSans
+    PickerButton.Text = ""
+    PickerButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PickerButton.TextSize = 14
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = PickerFrame
+
+    PickerButton.MouseButton1Click:Connect(function()
+        -- Placeholder for color picker functionality
+        -- Replace this with your custom color picker logic
+        local newColor = Color3.fromRGB(math.random(0, 255), math.random(0, 255), math.random(0, 255))
+        PickerButton.BackgroundColor3 = newColor
+        Callback(newColor)
+    end)
+
+    return PickerFrame
+end
+
+-- Add notifications
+function Library:CreateNotification(Frame, NotificationText, Duration)
+    local NotificationFrame = Instance.new("Frame")
+    local NotificationLabel = Instance.new("TextLabel")
+
+    NotificationFrame.Name = "NotificationFrame"
+    NotificationFrame.Parent = Frame
+    NotificationFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    NotificationFrame.Position = UDim2.new(0.5, -100, 0, -50)
+    NotificationFrame.Size = UDim2.new(0, 200, 0, 50)
+
+    NotificationLabel.Name = "NotificationLabel"
+    NotificationLabel.Parent = NotificationFrame
+    NotificationLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    NotificationLabel.BackgroundTransparency = 1
+    NotificationLabel.Size = UDim2.new(1, 0, 1, 0)
+    NotificationLabel.Font = Enum.Font.SourceSans
+    NotificationLabel.Text = NotificationText
+    NotificationLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    NotificationLabel.TextSize = 18
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = NotificationFrame
+
+    NotificationFrame:TweenPosition(UDim2.new(0.5, -100, 0, 50), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true)
+
+    delay(Duration or 3, function()
+        NotificationFrame:TweenPosition(UDim2.new(0.5, -100, 0, -50), Enum.EasingDirection.InOut, Enum.EasingStyle.Quad, 0.5, true, function()
+            NotificationFrame:Destroy()
+        end)
+    end)
+
+    return NotificationFrame
+end
+
+-- Add prompts
+function Library:CreatePrompt(Frame, PromptText, Callback)
+    local PromptFrame = Instance.new("Frame")
+    local PromptLabel = Instance.new("TextLabel")
+    local ConfirmButton = Instance.new("TextButton")
+    local CancelButton = Instance.new("TextButton")
+
+    PromptFrame.Name = "PromptFrame"
+    PromptFrame.Parent = Frame
+    PromptFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    PromptFrame.Position = UDim2.new(0.5, -150, 0.5, -50)
+    PromptFrame.Size = UDim2.new(0, 300, 0, 100)
+
+    PromptLabel.Name = "PromptLabel"
+    PromptLabel.Parent = PromptFrame
+    PromptLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    PromptLabel.BackgroundTransparency = 1
+    PromptLabel.Size = UDim2.new(1, 0, 0.5, 0)
+    PromptLabel.Font = Enum.Font.SourceSans
+    PromptLabel.Text = PromptText
+    PromptLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    PromptLabel.TextSize = 18
+
+    ConfirmButton.Name = "ConfirmButton"
+    ConfirmButton.Parent = PromptFrame
+    ConfirmButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    ConfirmButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+    ConfirmButton.Size = UDim2.new(0.35, 0, 0.3, 0)
+    ConfirmButton.Font = Enum.Font.SourceSans
+    ConfirmButton.Text = "Confirm"
+    ConfirmButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ConfirmButton.TextSize = 18
+
+    CancelButton.Name = "CancelButton"
+    CancelButton.Parent = PromptFrame
+    CancelButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    CancelButton.Position = UDim2.new(0.55, 0, 0.6, 0)
+    CancelButton.Size = UDim2.new(0.35, 0, 0.3, 0)
+    CancelButton.Font = Enum.Font.SourceSans
+    CancelButton.Text = "Cancel"
+    CancelButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CancelButton.TextSize = 18
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = PromptFrame
+
+    ConfirmButton.MouseButton1Click:Connect(function()
+        Callback(true)
+        PromptFrame:Destroy()
+    end)
+
+    CancelButton.MouseButton1Click:Connect(function()
+        Callback(false)
+        PromptFrame:Destroy()
+    end)
+
+    return PromptFrame
+end
+
+return Library
