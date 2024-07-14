@@ -4,19 +4,19 @@ Library.__index = Library
 local UIS = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
-local function makeDraggable(frame)
+local function makeDraggable(topbarObject, object)
     local dragging, dragInput, dragStart, startPos
 
     local function update(input)
         local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 
-    frame.InputBegan:Connect(function(input)
+    topbarObject.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
-            startPos = frame.Position
+            startPos = object.Position
 
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
@@ -26,7 +26,7 @@ local function makeDraggable(frame)
         end
     end)
 
-    frame.InputChanged:Connect(function(input)
+    topbarObject.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
@@ -121,7 +121,7 @@ function Library:CreateWindow(title)
         window.ScreenGui:Destroy()
     end)
 
-    makeDraggable(window.TitleBar)
+    makeDraggable(window.TitleBar, window.MainFrame)
 
     setmetatable(window, self)
     return window
