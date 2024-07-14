@@ -1,11 +1,11 @@
 local Library = {}
 
--- Create the main GUI frame
-function Library:CreateMainFrame()
+-- Create the main GUI frame with customization options
+function Library:Create(options)
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
 
-    ScreenGui.Name = "CustomLibrary"
+    ScreenGui.Name = options.Name or "CustomLibrary"
     ScreenGui.Parent = game.CoreGui
 
     MainFrame.Name = "MainFrame"
@@ -13,7 +13,7 @@ function Library:CreateMainFrame()
     MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     MainFrame.BorderSizePixel = 0
     MainFrame.Position = UDim2.new(0.3, 0, 0.2, 0)
-    MainFrame.Size = UDim2.new(0, 600, 0, 400)
+    MainFrame.Size = options.Size or UDim2.new(0, 600, 0, 400)
     MainFrame.ClipsDescendants = true
     MainFrame.Draggable = true
     MainFrame.Active = true
@@ -23,7 +23,10 @@ function Library:CreateMainFrame()
     UICorner.CornerRadius = UDim.new(0, 10)
     UICorner.Parent = MainFrame
 
-    return ScreenGui, MainFrame
+    return {
+        ScreenGui = ScreenGui,
+        MainFrame = MainFrame
+    }
 end
 
 -- Add browser-like navigation tabs
