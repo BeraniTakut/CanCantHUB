@@ -245,6 +245,8 @@ function Library:CreateTextbox(tab, name, callback)
     textbox.TextBox.Font = Enum.Font.Gotham
     textbox.TextBox.TextSize = 14
     textbox.TextBox.ClearTextOnFocus = false
+    textbox.TextBox.TextWrapped = true
+    textbox.TextBox.ClipsDescendants = true
     textbox.TextBox.Parent = tab.Content
 
     textbox.TextBox.FocusLost:Connect(function(enterPressed)
