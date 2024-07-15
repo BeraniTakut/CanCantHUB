@@ -4,9 +4,11 @@
 ## AIO (All In One)
 `loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/games/AIO"))()`
 
-### List Games
+### Games
 - [x] Unnamed Shooter (TESTING)
   - [x] Normal
+    - [x] Windows
+    - [x] Mobile
   - [x] Duel Only
 - [x] [FPS] Gun Grounds FFA (TESTING)
 - **More Coming Soon...**
