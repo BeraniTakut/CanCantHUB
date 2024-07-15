@@ -37,8 +37,6 @@ function Library:CreateDraggableGUI(title, size)
     Title.Text = title
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.TextSize = 18.000
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.TextYAlignment = Enum.TextYAlignment.Center
 
     -- Close Button
     CloseButton.Name = "CloseButton"
