@@ -18,8 +18,10 @@
 
 ### Tested Devices
 - [x] Windows
-- [ ] Mobile
+- [ ] Mobile - very buggy
 
 ### Tested Executors
 - [x] Wave
 - [x] Solara
+- [x] Arceus X 
+- [ ] Celery - Not work with loadstring 
