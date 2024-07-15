@@ -8,7 +8,7 @@
 - [x] Unnamed Shooter (TESTING)
   - [x] Normal
     - [x] Windows
-    - [x] Mobile
+    - [ ] Mobile - very buggy
   - [x] Duel Only
 - [x] [FPS] Gun Grounds FFA (TESTING)
 - **More Coming Soon...**
@@ -18,7 +18,7 @@
 
 ### Tested Devices
 - [x] Windows
-- [ ] Mobile - very buggy
+- [ ] Mobile
 
 ### Tested Executors
 - [x] Wave
