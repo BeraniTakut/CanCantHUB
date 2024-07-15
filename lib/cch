@@ -117,7 +117,7 @@ function Library:CreateDraggableGUI(title, size)
     local isMinimized = false
     MinimizeButton.MouseButton1Click:Connect(function()
         if not isMinimized then
-            local tween = TweenService:Create(Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(Frame.Size.X.Scale, Frame.Size.X.Offset, 0.1, 0)})
+            local tween = TweenService:Create(Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(Frame.Size.X.Scale, Frame.Size.X.Offset, 0.1, Title.Size.Y.Offset)})
             tween:Play()
             isMinimized = true
         else
