@@ -15,6 +15,7 @@ function Library:CreateDraggableGUI(title, size)
     local Title = Instance.new("TextLabel")
     local CloseButton = Instance.new("TextButton")
     local MinimizeButton = Instance.new("TextButton")
+    local UICorner = Instance.new("UICorner")
 
     ScreenGui.Name = "SmoothDraggableGUI"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -27,6 +28,10 @@ function Library:CreateDraggableGUI(title, size)
     Frame.Position = UDim2.new(0.3, 0, 0.3, 0)
     Frame.Size = size
     Frame.ClipsDescendants = true
+
+    -- Add UICorner to make corners smooth
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = Frame
 
     Title.Name = "Title"
     Title.Parent = Frame
