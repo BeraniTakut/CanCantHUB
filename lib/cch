@@ -21,11 +21,6 @@ function Library:CreateDraggableGUI(title, size)
     local UICornerContentFrame = Instance.new("UICorner")
     local UICornerCloseButton = Instance.new("UICorner")
     local UICornerMinimizeButton = Instance.new("UICorner")
-    local UIStrokeFrame = Instance.new("UIStroke")
-    local UIStrokeTitle = Instance.new("UIStroke")
-    local UIStrokeCloseButton = Instance.new("UIStroke")
-    local UIStrokeMinimizeButton = Instance.new("UIStroke")
-    local UIShadowFrame = Instance.new("ImageLabel")
 
     ScreenGui.Name = "SmoothDraggableGUI"
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -43,23 +38,6 @@ function Library:CreateDraggableGUI(title, size)
     UICornerFrame.CornerRadius = UDim.new(0, 10)
     UICornerFrame.Parent = Frame
 
-    -- Add Stroke to Frame
-    UIStrokeFrame.Thickness = 2
-    UIStrokeFrame.Color = Color3.fromRGB(50, 50, 50)
-    UIStrokeFrame.Parent = Frame
-
-    -- Add Shadow to Frame
-    UIShadowFrame.Name = "Shadow"
-    UIShadowFrame.Parent = Frame
-    UIShadowFrame.BackgroundTransparency = 1
-    UIShadowFrame.Position = UDim2.new(0, -10, 0, -10)
-    UIShadowFrame.Size = UDim2.new(1, 20, 1, 20)
-    UIShadowFrame.Image = "rbxassetid://1316045217"
-    UIShadowFrame.ImageColor3 = Color3.fromRGB(0, 0, 0)
-    UIShadowFrame.ImageTransparency = 0.5
-    UIShadowFrame.ScaleType = Enum.ScaleType.Slice
-    UIShadowFrame.SliceCenter = Rect.new(10, 10, 118, 118)
-
     Title.Name = "Title"
     Title.Parent = Frame
     Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -73,11 +51,6 @@ function Library:CreateDraggableGUI(title, size)
     -- Add UICorner to Title
     UICornerTitle.CornerRadius = UDim.new(0, 10)
     UICornerTitle.Parent = Title
-
-    -- Add Stroke to Title
-    UIStrokeTitle.Thickness = 2
-    UIStrokeTitle.Color = Color3.fromRGB(50, 50, 50)
-    UIStrokeTitle.Parent = Title
 
     ContentFrame.Name = "ContentFrame"
     ContentFrame.Parent = Frame
@@ -105,11 +78,6 @@ function Library:CreateDraggableGUI(title, size)
     UICornerCloseButton.CornerRadius = UDim.new(0, 10)
     UICornerCloseButton.Parent = CloseButton
 
-    -- Add Stroke to Close Button
-    UIStrokeCloseButton.Thickness = 2
-    UIStrokeCloseButton.Color = Color3.fromRGB(50, 50, 50)
-    UIStrokeCloseButton.Parent = CloseButton
-
     -- Minimize Button
     MinimizeButton.Name = "MinimizeButton"
     MinimizeButton.Parent = Title
@@ -124,11 +92,6 @@ function Library:CreateDraggableGUI(title, size)
     -- Add UICorner to Minimize Button
     UICornerMinimizeButton.CornerRadius = UDim.new(0, 10)
     UICornerMinimizeButton.Parent = MinimizeButton
-
-    -- Add Stroke to Minimize Button
-    UIStrokeMinimizeButton.Thickness = 2
-    UIStrokeMinimizeButton.Color = Color3.fromRGB(50, 50, 50)
-    UIStrokeMinimizeButton.Parent = MinimizeButton
 
     -- Draggable functionality
     local dragging
