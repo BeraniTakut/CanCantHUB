@@ -41,7 +41,7 @@ function Library:CreateDraggableGUI(title, size)
     -- Close Button
     CloseButton.Name = "CloseButton"
     CloseButton.Parent = Title
-    CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    CloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     CloseButton.Size = UDim2.new(0.1, 0, 1, 0)
     CloseButton.Position = UDim2.new(0.9, 0, 0, 0)
     CloseButton.Text = "X"
@@ -52,10 +52,10 @@ function Library:CreateDraggableGUI(title, size)
     -- Minimize Button
     MinimizeButton.Name = "MinimizeButton"
     MinimizeButton.Parent = Title
-    MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+    MinimizeButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     MinimizeButton.Size = UDim2.new(0.1, 0, 1, 0)
     MinimizeButton.Position = UDim2.new(0.8, 0, 0, 0)
-    MinimizeButton.Text = "_"
+    MinimizeButton.Text = "-"
     MinimizeButton.Font = Enum.Font.SourceSans
     MinimizeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
     MinimizeButton.TextSize = 18.000
