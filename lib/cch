@@ -4,7 +4,12 @@ Library.__index = Library
 local TweenService = game:GetService("TweenService")
 local UIS = game:GetService("UserInputService")
 
-function Library:CreateDraggableGUI(title, size)
+function Library:CchGUI(title, size)
+    -- Check if GUI already exists and remove it
+    if game.Players.LocalPlayer.PlayerGui:FindFirstChild("SmoothDraggableGUI") then
+        game.Players.LocalPlayer.PlayerGui.SmoothDraggableGUI:Destroy()
+    end
+
     local ScreenGui = Instance.new("ScreenGui")
     local Frame = Instance.new("Frame")
     local Title = Instance.new("TextLabel")
