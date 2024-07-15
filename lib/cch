@@ -13,10 +13,12 @@ function Library:CreateDraggableGUI(title, size)
     local ScreenGui = Instance.new("ScreenGui")
     local Frame = Instance.new("Frame")
     local Title = Instance.new("TextLabel")
+    local ContentFrame = Instance.new("Frame")
     local CloseButton = Instance.new("TextButton")
     local MinimizeButton = Instance.new("TextButton")
     local UICornerFrame = Instance.new("UICorner")
     local UICornerTitle = Instance.new("UICorner")
+    local UICornerContentFrame = Instance.new("UICorner")
     local UICornerCloseButton = Instance.new("UICorner")
     local UICornerMinimizeButton = Instance.new("UICorner")
 
@@ -49,6 +51,17 @@ function Library:CreateDraggableGUI(title, size)
     -- Add UICorner to Title
     UICornerTitle.CornerRadius = UDim.new(0, 10)
     UICornerTitle.Parent = Title
+
+    ContentFrame.Name = "ContentFrame"
+    ContentFrame.Parent = Frame
+    ContentFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    ContentFrame.BorderSizePixel = 0
+    ContentFrame.Position = UDim2.new(0, 0, 0.1, 0)
+    ContentFrame.Size = UDim2.new(1, 0, 0.9, 0)
+    
+    -- Add UICorner to ContentFrame
+    UICornerContentFrame.CornerRadius = UDim.new(0, 10)
+    UICornerContentFrame.Parent = ContentFrame
 
     -- Close Button
     CloseButton.Name = "CloseButton"
@@ -132,11 +145,11 @@ function Library:CreateDraggableGUI(title, size)
     local isMinimized = false
     MinimizeButton.MouseButton1Click:Connect(function()
         if not isMinimized then
-            local tween = TweenService:Create(Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(Frame.Size.X.Scale, Frame.Size.X.Offset, 0.1, Title.Size.Y.Offset)})
+            local tween = TweenService:Create(ContentFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(ContentFrame.Size.X.Scale, ContentFrame.Size.X.Offset, 0, 0)})
             tween:Play()
             isMinimized = true
         else
-            local tween = TweenService:Create(Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = size})
+            local tween = TweenService:Create(ContentFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(ContentFrame.Size.X.Scale, ContentFrame.Size.X.Offset, 0.9, 0)})
             tween:Play()
             isMinimized = false
         end
