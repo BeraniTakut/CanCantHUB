@@ -2599,7 +2599,7 @@ local function main()
 
     if isGameSupported then
         local gameInfo = getGameInfo()
-        if not gameInfo atau tidak gameInfo.guiName atau tidak gameInfo.tabs atau tidak gameInfo.functions maka
+        if not gameInfo or not gameInfo.guiName or not gameInfo.tabs or not gameInfo.functions then
             game:GetService("Players").LocalPlayer:Kick("Error loading game info. Please check your configuration.")
         else
             -- Hentikan animasi checking games
