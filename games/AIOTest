@@ -2120,6 +2120,8 @@ local function createLoadingGUI()
     loadingText.BackgroundTransparency = 1
     loadingText.Font = Enum.Font.GothamBold
     loadingText.TextSize = 24
+    loadingText.TextScaled = true -- Menyesuaikan teks agar sesuai dengan ruang yang tersedia
+    loadingText.TextWrapped = true -- Membungkus teks agar tetap berada dalam batas
     loadingText.Parent = loadingFrame
 
     -- Animasi titik-titik pada teks "Checking games"
@@ -2576,57 +2578,7 @@ end
 -- Fungsi untuk memverifikasi kunci yang dimasukkan
 local function verifyKey(inputKey)
     local validKeys = {
-        "cch", "CCH", "Kontoru",
-        "CanCantHUB==nPuipj6eFXLrOWQVdtHsUpQxWHzvdXKSZNYAl68UM5weSsp85ge6lz9HN7UO0hHy",
-        "CanCantHUB==2X4cfh/H3o9+l89ypv/is4G0wf5kmaGNrP4SjixyBlYrxXeoxmIeIqpAbe6CkvTr",
-        "CanCantHUB==uZ6GyuQwp1IOkp35XzUK1dNTOM7ZvybWQR4yNInRXd+FuNVocN+xa3QasAzMu0sE",
-        "CanCantHUB==C2kAxNJPvwdzb8vocujAIXg21bPKBEGQLnPrey8BsmyasV1FVfFpRxQDgWaRdNzR",
-        "CanCantHUB==2qmLPk2t+N0IyS/xaoXt8Q58Xtw8+vfh1VVvpRj5xIf5atk6/a48oi8jknb0z9IA",
-        "CanCantHUB==UVdgkzK3e4dcaM7zyYyQaccJqgM3fYIsqQ3ecqhm3qFoNIo5joVLZGJJCdo/cZig",
-        "CanCantHUB==J5I4NE2VACviQF4Mt6ldNhEMev7WHc/jPjvEoCG2bi/uAXiinhz+xGBFBMLFyols",
-        "CanCantHUB==CeufDB0tkorpwpGYvXycszulTI2XwiBM7A9vnty87Vc2nldQqO1j37doKIAZv8pR",
-        "CanCantHUB==Vzsv2y3+l5DuPYYXGaVS4KDoRquQCBsMfvopb5KILTlO/D0IM8TU74u9ZJwFqRt1",
-        "CanCantHUB==oAETT+SWfTSE3X5s/jOh7jkH7IsKDMngVWa3jhPiJfEt1OpG1EZp0DylCetDNwgS",
-        "CanCantHUB==3kGJ8UF/LDcV2NIu7ISHND5GSe0oFM78hgkupW3exeqhIyW6Ujuq7WoFaENLbj9M",
-        "CanCantHUB==lxqtjqt7W4zAvGuVsQQQsmE0Rnlq1sN/FxDLbI3Usc4Niye5zd+QMiyc4arxUjAh",
-        "CanCantHUB==M1bv6xZm+nWHkIY6uSpWywyyPuWWZob6rqlyQh/hoeH5kwRoS0I8u+/Xcx7VxDPc",
-        "CanCantHUB==/L21B83prf3lM8Ocslz0ocMgYPN6H81wM7XXzbC8T7OLwGjBPt/F0pHE3eTNyAZS",
-        "CanCantHUB==N4TIo8d1AnUdQc4FLHRv4+Uw6fzIqDHqtE7fqvCT918ezm6fb2Ss6ItKRQv89G/l",
-        "CanCantHUB==sZIp3H3omJuIWaQzga7DTil7QkLBPtSf8PPBkH1RLnSbO/9fKLYrcCqduPgTx4qy",
-        "CanCantHUB==s6fJMksRmV7pkxPd74fVX/iLZqFCEdC68GDLPcYWvVfTw51SgIqBov4G/bPlZi6V",
-        "CanCantHUB==Mj5CMPFAb3ptN0qiaypOa3qdBubfa/NUbipVpmoxWuKk3S1peSXVo2uGbvCW+Mr4",
-        "CanCantHUB==cCFFu7mT5g2A+SMM1mOkfOab5sRGzjchaIEcCSWX0x/DFgg9h7ScHYbtthndoafe",
-        "CanCantHUB==dx9NM+qjWlKvAsdCQWzTXM6F82Nfm33pNZ2DNo98PVhrwbWTaHUyfU+lzgOtDaup",
-        "CanCantHUB==DujkaVSAJA3a/AYn1Ck3Tv4tNdk47TergtZWVvmNgLwWxrq3GZ7B0qe8r7euqhSq",
-        "CanCantHUB==uWFN0OTyi/QHXndNxPryTuDXyx962h5r4IzSNkJ5TkpEhXnzvcyXODJECh4GDHtJ",
-        "CanCantHUB==5bgScMXp0ftv04a6vSqi5tiSh72QlQ251p++54VfpyNPgK5reIr9QmhfHwRP2XfN",
-        "CanCantHUB==qAWwtxIODIIETOyM/cIWA81daNmqUo1w/40Sw65CeIduJiOpeqaw/dRk6Y7lnCzm",
-        "CanCantHUB==HGEk9LCwFaLb78VSG6S3btQeF9CsgymAYjtNOHdQmZbMbDmv20TRzn1mqpD9+9US",
-        "CanCantHUB==unJIyp5XIc4rKKIE3Rh1tCa53WVpmQdjGN7KMJ+Y6gULScyX/VnoXzY7sqUi0Ht7",
-        "CanCantHUB==aYGKD4VLzS3JPKhYoCDMkNtk22AiJznValGKZRbq7jRxxpwRbKCyKhHV9nCDcxNe",
-        "CanCantHUB==i7ovWl6+QEiqdkvd0GThl5uQSlGne4tnXz4lFqwWChoOMa1kBlF0foPKfgbWFfoG",
-        "CanCantHUB==TOTqYeupwA8uysUi6B1YOLAMSw9iO0tKxlRRtJkcINHKt7remvoRiMMe3mzCcFFU",
-        "CanCantHUB==PDKMPYU1A29j75DXKIeJjMVZN7NIRfweC6UIIsZL5xudx1pQf/oi5aAjsh8hpETu",
-        "CanCantHUB==yh5kVDMVAvd8d74dQ2nrsu3nLoHlNtFl/0eib3BaJYZLR3FNwMmkwav49t/ESSI5",
-        "CanCantHUB==w35ZiaohXm3Ltr8Jxw3uH4AfcNaaAVNXafEktuNlOCqa+JmegY5BHDeyuOd4PsJ0",
-        "CanCantHUB==M7UA+IuFz56sRkTNj1hodWlrCg9oW38sHmbekXqTDyz0zW3YVG1HYqALtJvZF7Gn",
-        "CanCantHUB==dW3LYYjgWLsiXE0CW/6ltWsdJlXY3/vg/7pTohLPHwDas5RG0jG5KTifrbQNBMxU",
-        "CanCantHUB==bOMRWHK5A9In/KyuGR0O59rc3kFi61CzUHbSeALH/1oqj8vQrDgDAsvej43SGS+u",
-        "CanCantHUB==2BbmB4supNKAu8fU4xRXasBlPildMhrugvgpCNof76BxcuCQswmbXSc7EREAi+bS",
-        "CanCantHUB==yCbn1loO9t/HLLeFbbic9H5aZUMav/PMpuwkw1FT+0/71ZdazHUUxU7fDbIPwJo6",
-        "CanCantHUB==PyrJK8mDyCRFRXN8lM0vWfV8Kztn/bdyyX7Pr7Uf6vFgqQKWK5zi69pqU7CXQn37",
-        "CanCantHUB==GzOgJHVa8NinL0Y/mGrryjAcIJcqdakBNtAFVcVZFPaFZLiNb8Mh+qqm5trtybna",
-        "CanCantHUB==zgNPZk9mp3413OWtK9TxNecphtwDyMfCrnZ2RLmzvDSRF3tFkJtHS35Gci3y9DVD",
-        "CanCantHUB==1Xphq30Bc8wqfpOZw7bKVMgIvqD8GvhxY1gVyb8/uonLT8B1/tD4t9roc5TuBYpk",
-        "CanCantHUB==4JIiRT9acyvP6lOSASq0pmsRS7kPlPEOTcfWfnI7Uk8Bew/nWS+a9UD1pGHx5mW+",
-        "CanCantHUB==jon/ZG2CPEP875ee6SD5nUuxRp84c1ciIVJQkwX9I5ru58v4KMRMz0V7pM89aizo",
-        "CanCantHUB==UmjZ35T/Of8lGnNHWka9HQmc0tcJHAvXEgO+fUf1ST8AgaGxCIVQ4nJcaN/L0riX",
-        "CanCantHUB==CI2VP7TO4IRCD99mi017/1+66VTSmaazuE6uHpg6ayb4tF8Kc5tmI7L0AKS+qPNf",
-        "CanCantHUB==aDVAdpmW4U6Ya0V9wYDWHDIarLhKbJL+axPrY3yBEmC0VnpYj1MvwQBxWIBCGdWp",
-        "CanCantHUB==cOh2mdzfU23uKutnmP5aPMLBsObsBEN+8Ev0No4GTyNLMLK6gKPy48gvbrAmlMsm",
-        "CanCantHUB==lYcor/NNqzNHqmuhYrp5C51HKZDQDJPtBb8boI/AZMwnVXGNll5LfAkiAabT3JgN",
-        "CanCantHUB==9yleuWPCRlayCxP96OmWFFg21yxE2Bzv0+8as8D5quVgd7ZDt5LBRRMOZ80hRLMx",
-        "CanCantHUB==TUFphgBPZHDi9deRn/hlFmsmX/lZN57xDuMloCtTvkpuNy2u/AzVg47ZNog88TSX"
+        "cch", "CCH", "Kontoru"
     } -- Gantilah dengan kunci yang valid
 
     for _, key in ipairs(validKeys) do
@@ -2647,7 +2599,7 @@ local function main()
 
     if isGameSupported then
         local gameInfo = getGameInfo()
-        if not gameInfo or not gameInfo.guiName or not gameInfo.tabs or not gameInfo.functions then
+        if not gameInfo atau tidak gameInfo.guiName atau tidak gameInfo.tabs atau tidak gameInfo.functions maka
             game:GetService("Players").LocalPlayer:Kick("Error loading game info. Please check your configuration.")
         else
             -- Hentikan animasi checking games
