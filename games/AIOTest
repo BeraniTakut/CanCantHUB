@@ -796,17 +796,21 @@ local gameNames = {
 
                 -- Function to update GUI circle position
                 local function updateCircleGui()
-                    local mousePosition = game:GetService("UserInputService"):GetMouseLocation()
-                    circleGui.Position = Vector2.new(mousePosition.X, mousePosition.Y)
+                    local viewportSize = camera.ViewportSize
+                    local centerPosition = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+                    circleGui.Position = centerPosition
                 end
 
-                -- Function to find nearest living part within max lock distance from mouse and camera
-                local function findNearestLivingPartInRadius(mousePosition)
+                -- Function to find nearest living part within max lock distance from screen center
+                local function findNearestLivingPartInRadius()
+                    local viewportSize = camera.ViewportSize
+                    local centerPosition = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+
                     local nearestPlayer = nil
                     local nearestPart = nil
                     local nearestDistance = math.huge
 
-                    local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
+                    local ray = camera:ViewportPointToRay(centerPosition.X, centerPosition.Y)
                     local mouseWorldPosition = ray.Origin + ray.Direction * maxLockDistance
 
                     local function calculateDistanceToPart(part)
@@ -835,7 +839,7 @@ local gameNames = {
                                             local distance = calculateDistanceToPart(head)
                                             if distance <= maxLockDistance then
                                                 local screenPosition = camera:WorldToViewportPoint(head.Position)
-                                                local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(mousePosition.X, mousePosition.Y)).Magnitude
+                                                local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - centerPosition).Magnitude
                                                 if cursorDistance <= lockRadius then
                                                     nearestDistance = distance
                                                     nearestPlayer = otherPlayer
@@ -851,7 +855,7 @@ local gameNames = {
                                                     local distance = calculateDistanceToPart(part)
                                                     if distance <= maxLockDistance and isPartVisible(part) then
                                                         local screenPosition = camera:WorldToViewportPoint(part.Position)
-                                                        local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(mousePosition.X, mousePosition.Y)).Magnitude
+                                                        local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - centerPosition).Magnitude
                                                         if cursorDistance <= lockRadius then
                                                             nearestDistance = distance
                                                             nearestPlayer = otherPlayer
@@ -872,8 +876,7 @@ local gameNames = {
 
                 -- Function to lock nearest living part
                 local function lockNearestLivingPart()
-                    local mousePosition = game:GetService("UserInputService"):GetMouseLocation()
-                    local nearestPlayer, nearestPart, nearestDistance = findNearestLivingPartInRadius(mousePosition)
+                    local nearestPlayer, nearestPart, nearestDistance = findNearestLivingPartInRadius()
                     
                     if nearestPlayer and nearestDistance <= maxLockDistance then
                         targetPlayer = nearestPlayer
@@ -957,20 +960,11 @@ local gameNames = {
                     Callback = onInterpolationSpeedChanged
                 }
 
-                local function onInputChanged(input)
-                    if isLocking then
-                        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-                            lockNearestLivingPart()
-                            updateCircleGui()
-                        end
-                    end
-                end
-
-                game:GetService("UserInputService").InputChanged:Connect(onInputChanged)
-
                 game:GetService("RunService").RenderStepped:Connect(function()
                     if isLocking then
+                        lockNearestLivingPart()
                         updateCamera()
+                        updateCircleGui()
                     end
                 end)
                 if tabs.miscTab then
