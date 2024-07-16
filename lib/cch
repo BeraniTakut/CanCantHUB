@@ -1,1 +1,139 @@
+-- UI Library Initialization
+local UILibrary = {}
 
+-- Theme Definitions
+UILibrary.Themes = {
+    Dark = {
+        BackgroundColor = Color3.fromRGB(19, 7, 30),
+        TextColor = Color3.fromRGB(255, 255, 255),
+        ButtonColor = Color3.fromRGB(35, 35, 35),
+        ButtonTextColor = Color3.fromRGB(255, 255, 255),
+        BorderColor = Color3.fromRGB(255, 255, 255)
+    },
+    Light = {
+        BackgroundColor = Color3.fromRGB(255, 255, 255),
+        TextColor = Color3.fromRGB(0, 0, 0),
+        ButtonColor = Color3.fromRGB(200, 200, 200),
+        ButtonTextColor = Color3.fromRGB(0, 0, 0),
+        BorderColor = Color3.fromRGB(0, 0, 0)
+    }
+}
+
+-- Default Theme
+UILibrary.CurrentTheme = UILibrary.Themes.Dark
+
+-- Utility Functions
+local function applyTheme(instance, properties)
+    for property, value in pairs(properties) do
+        instance[property] = value
+    end
+end
+
+-- UI Components
+
+-- Create Frame
+function UILibrary:CreateFrame(properties)
+    local frame = Instance.new("Frame")
+    frame.Size = properties.Size or UDim2.new(0.5, 0, 0.5, 0)
+    frame.Position = properties.Position or UDim2.new(0.25, 0, 0.25, 0)
+    frame.BackgroundColor3 = self.CurrentTheme.BackgroundColor
+    frame.BorderSizePixel = properties.BorderSizePixel or 0
+    applyTheme(frame, properties)
+    
+    return frame
+end
+
+-- Create Label
+function UILibrary:CreateLabel(properties)
+    local label = Instance.new("TextLabel")
+    label.Size = properties.Size or UDim2.new(1, 0, 0.1, 0)
+    label.Position = properties.Position or UDim2.new(0, 0, 0, 0)
+    label.BackgroundTransparency = 1
+    label.TextColor3 = self.CurrentTheme.TextColor
+    label.Text = properties.Text or "Label"
+    label.Font = properties.Font or Enum.Font.GothamBold
+    label.TextSize = properties.TextSize or 18
+    applyTheme(label, properties)
+    
+    return label
+end
+
+-- Create Button
+function UILibrary:CreateButton(properties)
+    local button = Instance.new("TextButton")
+    button.Size = properties.Size or UDim2.new(0.2, 0, 0.1, 0)
+    button.Position = properties.Position or UDim2.new(0, 0, 0.1, 0)
+    button.BackgroundColor3 = self.CurrentTheme.ButtonColor
+    button.TextColor3 = self.CurrentTheme.ButtonTextColor
+    button.Text = properties.Text or "Button"
+    button.Font = properties.Font or Enum.Font.GothamBold
+    button.TextSize = properties.TextSize or 18
+    applyTheme(button, properties)
+    
+    return button
+end
+
+-- Create TextBox
+function UILibrary:CreateTextBox(properties)
+    local textBox = Instance.new("TextBox")
+    textBox.Size = properties.Size or UDim2.new(0.4, 0, 0.1, 0)
+    textBox.Position = properties.Position or UDim2.new(0.3, 0, 0.2, 0)
+    textBox.BackgroundColor3 = self.CurrentTheme.BackgroundColor
+    textBox.TextColor3 = self.CurrentTheme.TextColor
+    textBox.PlaceholderText = properties.PlaceholderText or "Enter text"
+    textBox.Font = properties.Font or Enum.Font.Gotham
+    textBox.TextSize = properties.TextSize or 18
+    applyTheme(textBox, properties)
+    
+    return textBox
+end
+
+-- Create Slider
+function UILibrary:CreateSlider(properties)
+    local slider = Instance.new("Frame")
+    slider.Size = properties.Size or UDim2.new(0.8, 0, 0.1, 0)
+    slider.Position = properties.Position or UDim2.new(0.1, 0, 0.3, 0)
+    slider.BackgroundColor3 = self.CurrentTheme.BackgroundColor
+    applyTheme(slider, properties)
+    
+    local sliderBar = Instance.new("Frame")
+    sliderBar.Size = UDim2.new(1, 0, 0.2, 0)
+    sliderBar.Position = UDim2.new(0, 0, 0.4, 0)
+    sliderBar.BackgroundColor3 = self.CurrentTheme.ButtonColor
+    sliderBar.Parent = slider
+
+    local sliderButton = Instance.new("ImageButton")
+    sliderButton.Size = UDim2.new(0, 20, 0, 20)
+    sliderButton.Position = UDim2.new(0, 0, 0, 0)
+    sliderButton.BackgroundTransparency = 1
+    sliderButton.Image = properties.Image or "rbxassetid://"
+    sliderButton.Parent = slider
+
+    sliderButton.MouseButton1Down:Connect(function()
+        local input = game:GetService("UserInputService").InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                local newPosition = UDim2.new(math.clamp((input.Position.X - slider.AbsolutePosition.X) / slider.AbsoluteSize.X, 0, 1), 0, 0, 0)
+                sliderButton.Position = newPosition
+                if properties.Callback then
+                    properties.Callback(newPosition.X.Scale)
+                end
+            end
+        end)
+        game:GetService("UserInputService").InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                input:Disconnect()
+            end
+        end)
+    end)
+
+    return slider
+end
+
+-- Function to apply a theme
+function UILibrary:ApplyTheme(themeName)
+    if self.Themes[themeName] then
+        self.CurrentTheme = self.Themes[themeName]
+    end
+end
+
+return UILibrary
