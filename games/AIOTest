@@ -1,0 +1,2676 @@
+-- Inisialisasi Mercury terlebih dahulu
+local Mercury = loadstring(game:HttpGet("https://raw.githubusercontent.com/deeeity/mercury-lib/master/src.lua"))()
+
+-- ID tempat dari game yang didukung dan nama GUI serta nama tab yang sesuai
+local gameNames = {
+    {
+        placeIds = {17887390746, 17887392216, 17887398185}, -- Tambahkan lebih dari satu PlaceId di sini
+        guiName = "Unnamed Shooter",
+        tabs = {
+            playerTab = "PLAYER",
+            espTab = "ESP",
+            aimbotTab = "AIMBOT",
+            miscTab = "MISC"
+        },
+        functions = function(GUI, tabs)
+            if tabs.playerTab then
+                local PlayerTab = GUI:Tab{
+                    Name = tabs.playerTab,
+                    Icon = "rbxassetid://"
+                }
+                PlayerTab:Slider{
+                    Name = "WalkSpeed",
+                    Default = 16,
+                    Min = 16,
+                    Max = 500,
+                    Description = "Changes the player's WalkSpeed.",
+                    Callback = function(Value)
+                        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+                    end
+                }
+                PlayerTab:Slider{
+                    Name = "JumpPower",
+                    Default = 50,
+                    Min = 50,
+                    Max = 500,
+                    Description = "Changes the player's JumpPower.",
+                    Callback = function(Value)
+                        game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+                    end
+                }
+                -- Terbang
+                PlayerTab:Button{
+                    Name = "Fly",
+                    Description = "Make the player Fly | Toggle E to Fly On/Off.",
+                    Callback = function()
+                        local UIS = game:GetService("UserInputService")
+                        local StarterGui = game:GetService("StarterGui")
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                        local humanoid = character:WaitForChild("Humanoid")
+                        
+                        local flying = false
+                        local maxSpeed = 100
+                        local control = {f = 0, b = 0, l = 0, r = 0}
+                        local bg, bv
+                        
+                        local function createBodyGyro()
+                            local bg = Instance.new("BodyGyro")
+                            bg.P = 9e4
+                            bg.maxTorque = Vector3.new(9e9, 9e9, 9e9)
+                            bg.cframe = humanoidRootPart.CFrame
+                            bg.Parent = humanoidRootPart
+                            return bg
+                        end
+                        
+                        local function createBodyVelocity()
+                            local bv = Instance.new("BodyVelocity")
+                            bv.velocity = Vector3.new(0, 0.1, 0)
+                            bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
+                            bv.Parent = humanoidRootPart
+                            return bv
+                        end
+                        
+                        local function startFlying()
+                            humanoid.PlatformStand = true
+                            bg = createBodyGyro()
+                            bv = createBodyVelocity()
+                        end
+                        
+                        local function stopFlying()
+                            humanoid.PlatformStand = false
+                            if bg then bg:Destroy() end
+                            if bv then bv:Destroy() end
+                        end
+                        
+                        local function flyLoop()
+                            while flying do
+                                local speed = maxSpeed
+                                local moveVector = (game.Workspace.CurrentCamera.CFrame.lookVector * (control.f + control.b)) +
+                                                ((game.Workspace.CurrentCamera.CFrame * CFrame.new(control.l + control.r, (control.f + control.b) * 0.2, 0).p) - game.Workspace.CurrentCamera.CFrame.p)
+                                bv.velocity = moveVector * speed
+                                bg.cframe = game.Workspace.CurrentCamera.CFrame * CFrame.Angles(-math.rad((control.f + control.b) * 50 * speed / maxSpeed), 0, 0)
+                                wait()
+                            end
+                        end
+                        
+                        local function onCharacterAdded(char)
+                            character = char
+                            humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+                            humanoid = character:WaitForChild("Humanoid")
+                            
+                            if flying then
+                                startFlying()
+                                coroutine.wrap(flyLoop)()
+                            end
+                        end
+                        
+                        player.CharacterAdded:Connect(onCharacterAdded)
+                        
+                        local mouse = player:GetMouse()
+                        
+                        mouse.KeyDown:Connect(function(key)
+                            if key:lower() == "e" then
+                                flying = not flying
+                                if flying then
+                                    startFlying()
+                                    coroutine.wrap(flyLoop)()
+                                else
+                                    stopFlying()
+                                end
+                            elseif key:lower() == "w" then
+                                control.f = 1
+                            elseif key:lower() == "s" then
+                                control.b = -1
+                            elseif key:lower() == "a" then
+                                control.l = -1
+                            elseif key:lower() == "d" then
+                                control.r = 1
+                            end
+                        end)
+                        
+                        mouse.KeyUp:Connect(function(key)
+                            if key:lower() == "w" then
+                                control.f = 0
+                            elseif key:lower() == "s" then
+                                control.b = 0
+                            elseif key:lower() == "a" then
+                                control.l = 0
+                            elseif key:lower() == "d" then
+                                control.r = 0
+                            end
+                        end)
+                        
+                        if flying then
+                            startFlying()
+                            coroutine.wrap(flyLoop)()
+                        end
+                    end
+                }
+                -- No-Clip
+                local Players = game:GetService("Players")
+                local RunService = game:GetService("RunService")
+
+                local player = Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoid = character:WaitForChild("Humanoid")
+
+                local noClipEnabled = false
+
+                local function toggleNoClip(state)
+                    noClipEnabled = state
+                    if noClipEnabled then
+                        RunService.Stepped:Connect(function()
+                            if noClipEnabled and character and humanoid then
+                                for _, part in pairs(character:GetDescendants()) do
+                                    if part:IsA("BasePart") and part.CanCollide then
+                                        part.CanCollide = false
+                                    end
+                                end
+                            end
+                        end)
+                    else
+                        if character and humanoid then
+                            for _, part in pairs(character:GetDescendants()) do
+                                if part:IsA("BasePart") then
+                                    part.CanCollide = true
+                                end
+                            end
+                        end
+                    end
+                end
+
+                PlayerTab:Toggle{
+                    Name = "No-Clip",
+                    StartingState = false,
+                    Description = "allows you to penetrate objects",
+                    Callback = function(state)
+                        toggleNoClip(state)
+                    end
+                }
+
+                -- Ensure No-Clip is disabled on respawn
+                player.CharacterAdded:Connect(function(char)
+                    character = char
+                    humanoid = character:WaitForChild("Humanoid")
+                    if not noClipEnabled then
+                        for _, part in pairs(character:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.CanCollide = true
+                            end
+                        end
+                    end
+                end)
+
+                -- Hitbox
+                local Players = game:GetService("Players")
+                local LocalPlayer = Players.LocalPlayer
+                local Teams = game:GetService("Teams")
+
+                -- Variabel untuk menyimpan status toggle dan ukuran hitbox
+                local hitboxEnabled = false
+                local hitboxSize = Vector3.new(15, 15, 15) -- Ukuran hitbox default
+
+                local function modifyHitbox(player)
+                    if player and player.Character and hitboxEnabled then
+                        local rootPart = player.Character:WaitForChild("HumanoidRootPart")
+                        if rootPart then
+                            rootPart.Size = hitboxSize -- Ukuran hitbox berdasarkan slider
+                            rootPart.Transparency = 0.5 -- Membuat hitbox setengah transparan
+                        end
+                    end
+                end
+
+                local function resetHitbox(player)
+                    if player and player.Character then
+                        local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                        if rootPart then
+                            rootPart.Size = Vector3.new(2, 2, 1) -- Ukuran hitbox default
+                            rootPart.Transparency = 1 -- Membuat hitbox tidak transparan
+                        end
+                    end
+                end
+
+                local function onCharacterAdded(character)
+                    local player = Players:GetPlayerFromCharacter(character)
+                    if player and player ~= LocalPlayer then
+                        -- Periksa apakah player berada di tim yang sama atau tidak
+                        if not Teams or not LocalPlayer.Team or player.Team ~= LocalPlayer.Team then
+                            modifyHitbox(player)
+                        end
+                    end
+                end
+
+                local function onPlayerAdded(player)
+                    if player ~= LocalPlayer then
+                        player.CharacterAdded:Connect(onCharacterAdded)
+                        -- Modifikasi hitbox jika karakter sudah ada
+                        if player.Character then
+                            onCharacterAdded(player.Character)
+                        end
+                    end
+                end
+
+                -- Modifikasi hitbox semua pemain yang sudah ada dalam game
+                for _, player in ipairs(Players:GetPlayers()) do
+                    onPlayerAdded(player)
+                end
+
+                -- Hubungkan fungsi onPlayerAdded ke event PlayerAdded
+                Players.PlayerAdded:Connect(onPlayerAdded)
+
+                -- Toggle untuk mengaktifkan/menonaktifkan modifikasi hitbox
+                PlayerTab:Toggle{
+                    Name = "Hitbox",
+                    StartingState = false,
+                    Description = "Enlarges the player's hitbox",
+                    Callback = function(state)
+                        hitboxEnabled = state
+                        if not state then
+                            -- Reset semua hitbox jika dinonaktifkan
+                            for _, player in ipairs(Players:GetPlayers()) do
+                                resetHitbox(player)
+                            end
+                        else
+                            -- Modifikasi hitbox semua pemain jika diaktifkan
+                            for _, player in ipairs(Players:GetPlayers()) do
+                                if player.Character then
+                                    onCharacterAdded(player.Character)
+                                end
+                            end
+                        end
+                    end
+                }
+            end
+            if tabs.espTab then
+                local ESPTab = GUI:Tab{
+                    Name = tabs.espTab,
+                    Icon = "rbxassetid://"
+                }
+                -- ESP
+                -- Local player
+                local LocalPlayer = game:GetService("Players").LocalPlayer
+                local Players = game:GetService("Players")
+                local RunService = game:GetService("RunService")
+
+                -- Konfigurasi
+                local ESP_ENABLED = false
+                local SHOW_PLAYER_NAMES = true
+                local SHOW_HEALTH_INDICATOR = true
+                local SHOW_DISTANCE = true
+                local MAX_DISTANCE = 1000
+                local NAME_POSITION = "Head"
+                local NAME_TEXT_SIZE = 10
+                local HEALTH_TEXT_SIZE = 10
+                local DISTANCE_TEXT_SIZE = 10
+                local DISTANCE_COLOR = Color3.fromRGB(255, 255, 0)
+                local ESP_METHOD = nil
+
+                -- Fungsi untuk mendapatkan warna tim dengan pengecekan tim kosong
+                local function GetTeamColor(Player)
+                    if Player.Team then
+                        local teamPlayers = Players:GetPlayers()
+                        local teamHasPlayers = false
+                        for _, teamPlayer in ipairs(teamPlayers) do
+                            if teamPlayer.Team == Player.Team then
+                                teamHasPlayers = true
+                                break
+                            end
+                        end
+                        if teamHasPlayers then
+                            return Player.Team.TeamColor.Color
+                        end
+                    end
+                    return Color3.new(1, 1, 1)
+                end
+
+                -- Fungsi untuk membuat ESP dengan metode Highlight
+                local function CreateHighlightESP(Player)
+                    if Player.Character then
+                        local Highlight = Instance.new("Highlight")
+                        Highlight.Adornee = Player.Character
+                        Highlight.FillColor = Color3.new(0, 0, 0)
+                        Highlight.OutlineColor = GetTeamColor(Player)
+                        Highlight.OutlineTransparency = 0
+                        Highlight.FillTransparency = 1
+                        Highlight.Parent = Player.Character
+
+                        local BillboardGui = Instance.new("BillboardGui")
+                        BillboardGui.Size = UDim2.new(0, 200, 0, 60)
+                        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                        BillboardGui.AlwaysOnTop = true
+                        BillboardGui.Name = "PlayerInfo"
+
+                        local PositionOffset
+                        if NAME_POSITION == "Center" then
+                            PositionOffset = Vector3.new(0, -2, 0)
+                        elseif NAME_POSITION == "Feet" then
+                            PositionOffset = Vector3.new(0, -5, 0)
+                        else
+                            PositionOffset = Vector3.new(0, 2, 0)
+                        end
+
+                        local HealthLabel = Instance.new("TextLabel")
+                        HealthLabel.Parent = BillboardGui
+                        HealthLabel.Name = "HealthLabel"
+                        HealthLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                        HealthLabel.BackgroundTransparency = 1
+                        HealthLabel.TextStrokeTransparency = 0
+                        HealthLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        HealthLabel.TextScaled = false
+                        HealthLabel.TextSize = HEALTH_TEXT_SIZE
+                        HealthLabel.Position = UDim2.new(0, 0, 0, 0)
+                        HealthLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+                        local NameLabel = Instance.new("TextLabel")
+                        NameLabel.Parent = BillboardGui
+                        NameLabel.Name = "NameLabel"
+                        NameLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                        NameLabel.BackgroundTransparency = 1
+                        NameLabel.TextColor3 = GetTeamColor(Player)
+                        NameLabel.TextStrokeTransparency = 0
+                        NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        NameLabel.TextScaled = false
+                        NameLabel.TextSize = NAME_TEXT_SIZE
+                        NameLabel.Position = UDim2.new(0, 0, 0.33, 0)
+                        NameLabel.TextYAlignment = Enum.TextYAlignment.Center
+                        NameLabel.Text = Player.Name
+
+                        local DistanceLabel = Instance.new("TextLabel")
+                        DistanceLabel.Parent = BillboardGui
+                        DistanceLabel.Name = "DistanceLabel"
+                        DistanceLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                        DistanceLabel.BackgroundTransparency = 1
+                        DistanceLabel.TextColor3 = DISTANCE_COLOR
+                        DistanceLabel.TextStrokeTransparency = 0
+                        DistanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        DistanceLabel.TextScaled = false
+                        DistanceLabel.TextSize = DISTANCE_TEXT_SIZE
+                        DistanceLabel.Position = UDim2.new(0, 0, 0.66, 0)
+                        DistanceLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+                        local targetHealth = 100
+                        local displayedHealth = 100
+
+                        local function UpdateHealth()
+                            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                targetHealth = Player.Character.Humanoid.Health
+                            end
+                        end
+
+                        UpdateHealth()
+                        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                            Player.Character.Humanoid.HealthChanged:Connect(UpdateHealth)
+                        end
+
+                        RunService.RenderStepped:Connect(function()
+                            if ESP_ENABLED and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                displayedHealth = displayedHealth + (targetHealth - displayedHealth) * 0.1
+
+                                local healthRatio = displayedHealth / Player.Character.Humanoid.MaxHealth
+                                local color = Color3.new(1 - healthRatio, healthRatio, 0)
+
+                                HealthLabel.Text = "(" .. math.floor(displayedHealth) .. ")"
+                                HealthLabel.TextColor3 = color
+
+                                local distance = (Player.Character.PrimaryPart.Position - LocalPlayer.Character.PrimaryPart.Position).Magnitude
+                                DistanceLabel.Text = string.format("%.1f studs", distance)
+
+                                NameLabel.Visible = SHOW_PLAYER_NAMES
+                                HealthLabel.Visible = SHOW_HEALTH_INDICATOR
+                                DistanceLabel.Visible = SHOW_DISTANCE
+                            end
+                        end)
+
+                        BillboardGui.Adornee = Player.Character:FindFirstChild(NAME_POSITION) or Player.Character.PrimaryPart
+                        BillboardGui.StudsOffset = PositionOffset
+                        BillboardGui.Parent = Player.Character
+                    end
+                end
+
+                -- Fungsi untuk membuat ESP dengan metode Drawing Box
+                local function CreateDrawingBoxESP(Player)
+                    if Player.Character then
+                        local BillboardGui = Instance.new("BillboardGui")
+                        BillboardGui.Size = UDim2.new(0, 200, 0, 60)
+                        BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                        BillboardGui.AlwaysOnTop = true
+                        BillboardGui.Name = "PlayerInfo"
+
+                        local PositionOffset
+                        if NAME_POSITION == "Center" then
+                            PositionOffset = Vector3.new(0, -2, 0)
+                        elseif NAME_POSITION == "Feet" then
+                            PositionOffset = Vector3.new(0, -5, 0)
+                        else
+                            PositionOffset = Vector3.new(0, 2, 0)
+                        end
+
+                        local HealthLabel = Instance.new("TextLabel")
+                        HealthLabel.Parent = BillboardGui
+                        HealthLabel.Name = "HealthLabel"
+                        HealthLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                        HealthLabel.BackgroundTransparency = 1
+                        HealthLabel.TextStrokeTransparency = 0
+                        HealthLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        HealthLabel.TextScaled = false
+                        HealthLabel.TextSize = HEALTH_TEXT_SIZE
+                        HealthLabel.Position = UDim2.new(0, 0, 0, 0)
+                        HealthLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+                        local NameLabel = Instance.new("TextLabel")
+                        NameLabel.Parent = BillboardGui
+                        NameLabel.Name = "NameLabel"
+                        NameLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                        NameLabel.BackgroundTransparency = 1
+                        NameLabel.TextColor3 = GetTeamColor(Player)
+                        NameLabel.TextStrokeTransparency = 0
+                        NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        NameLabel.TextScaled = false
+                        NameLabel.TextSize = NAME_TEXT_SIZE
+                        NameLabel.Position = UDim2.new(0, 0, 0.33, 0)
+                        NameLabel.TextYAlignment = Enum.TextYAlignment.Center
+                        NameLabel.Text = Player.Name
+
+                        local DistanceLabel = Instance.new("TextLabel")
+                        DistanceLabel.Parent = BillboardGui
+                        DistanceLabel.Name = "DistanceLabel"
+                        DistanceLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                        DistanceLabel.BackgroundTransparency = 1
+                        DistanceLabel.TextColor3 = DISTANCE_COLOR
+                        DistanceLabel.TextStrokeTransparency = 0
+                        DistanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        DistanceLabel.TextScaled = false
+                        DistanceLabel.TextSize = DISTANCE_TEXT_SIZE
+                        DistanceLabel.Position = UDim2.new(0, 0, 0.66, 0)
+                        DistanceLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+                        local targetHealth = 100
+                        local displayedHealth = 100
+
+                        local function UpdateHealth()
+                            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                targetHealth = Player.Character.Humanoid.Health
+                            end
+                        end
+
+                        UpdateHealth()
+                        if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                            Player.Character.Humanoid.HealthChanged:Connect(UpdateHealth)
+                        end
+
+                        -- Create Drawing Box
+                        local Box = Drawing.new("Square")
+                        Box.Visible = true
+                        Box.Thickness = 2
+                        Box.Transparency = 1
+                        Box.Color = GetTeamColor(Player)
+
+                        RunService.RenderStepped:Connect(function()
+                            if ESP_ENABLED and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                displayedHealth = displayedHealth + (targetHealth - displayedHealth) * 0.1
+
+                                local healthRatio = displayedHealth / Player.Character.Humanoid.MaxHealth
+                                local color = Color3.new(1 - healthRatio, healthRatio, 0)
+
+                                HealthLabel.Text = "(" .. math.floor(displayedHealth) .. ")"
+                                HealthLabel.TextColor3 = color
+
+                                local distance = (Player.Character.PrimaryPart.Position - LocalPlayer.Character.PrimaryPart.Position).Magnitude
+                                DistanceLabel.Text = string.format("%.1f studs", distance)
+
+                                NameLabel.Visible = SHOW_PLAYER_NAMES
+                                HealthLabel.Visible = SHOW_HEALTH_INDICATOR
+                                DistanceLabel.Visible = SHOW_DISTANCE
+
+                                -- Update Drawing Box
+                                local RootPart = Player.Character:FindFirstChild("HumanoidRootPart")
+                                if RootPart then
+                                    local RootPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(RootPart.Position)
+                                    if onScreen then
+                                        local HeadPos = workspace.CurrentCamera:WorldToViewportPoint(Player.Character.Head.Position)
+                                        local LegPos = workspace.CurrentCamera:WorldToViewportPoint(Player.Character.HumanoidRootPart.Position - Vector3.new(0, 3, 0))
+
+                                        Box.Size = Vector2.new(2000 / distance, HeadPos.Y - LegPos.Y)
+                                        Box.Position = Vector2.new(RootPos.X - Box.Size.X / 2, RootPos.Y - Box.Size.Y / 2)
+                                        Box.Visible = true
+                                    else
+                                        Box.Visible = false
+                                    end
+                                end
+                            else
+                                Box.Visible = false
+                            end
+                        end)
+
+                        BillboardGui.Adornee = Player.Character:FindFirstChild(NAME_POSITION) or Player.Character.PrimaryPart
+                        BillboardGui.StudsOffset = PositionOffset
+                        BillboardGui.Parent = Player.Character
+                    end
+                end
+
+                -- Fungsi untuk memperbarui warna indikator jarak pada semua pemain
+                local function UpdateDistanceIndicatorColor()
+                    for _, Player in pairs(Players:GetPlayers()) do
+                        if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                            Player.Character.PlayerInfo.DistanceLabel.TextColor3 = DISTANCE_INDICATOR_COLOR
+                        end
+                    end
+                end
+
+                -- Fungsi untuk membersihkan ESP
+                local function ClearESP()
+                    for _, Player in pairs(Players:GetPlayers()) do
+                        if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                            Player.Character.PlayerInfo:Destroy()
+                        end
+                        if Player.Character and Player.Character:FindFirstChild("Highlight") then
+                            Player.Character.Highlight:Destroy()
+                        end
+                    end
+                end
+
+                -- Fungsi untuk mengaktifkan ESP
+                local function ToggleESP(state)
+                    ESP_ENABLED = state
+                    if ESP_ENABLED then
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if ESP_METHOD == "Highlight" then
+                                CreateHighlightESP(Player)
+                            elseif ESP_METHOD == "DrawingBox" then
+                                CreateDrawingBoxESP(Player)
+                            end
+                        end
+                    else
+                        ClearESP()
+                    end
+                end
+
+                -- Menambah event listener untuk player baru
+                Players.PlayerAdded:Connect(function(Player)
+                    Player.CharacterAdded:Connect(function()
+                        if ESP_ENABLED then
+                            wait(1) -- Tunggu sebentar agar karakter terload
+                            if ESP_METHOD == "Highlight" then
+                                CreateHighlightESP(Player)
+                            elseif ESP_METHOD == "DrawingBox" then
+                                CreateDrawingBoxESP(Player)
+                            end
+                        end
+                    end)
+                end)
+
+                -- Event listener untuk player yang ada
+                for _, Player in pairs(Players:GetPlayers()) do
+                    Player.CharacterAdded:Connect(function()
+                        if ESP_ENABLED then
+                            wait(1) -- Tunggu sebentar agar karakter terload
+                            if ESP_METHOD == "Highlight" then
+                                CreateHighlightESP(Player)
+                            elseif ESP_METHOD == "DrawingBox" then
+                                CreateDrawingBoxESP(Player)
+                            end
+                        end
+                    end)
+                end
+
+                -- Dropdown untuk memilih metode ESP
+                local MyDropdown = ESPTab:Dropdown{
+                    Name = "ESP Method",
+                    StartingText = "Select...",
+                    Description = nil,
+                    Items = {
+                        {"Highlight", "Highlight"},
+                        {"Box", "DrawingBox"}
+                    },
+                    Callback = function(item)
+                        ESP_METHOD = item
+                        if ESP_ENABLED then
+                            ClearESP()
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if ESP_METHOD == "Highlight" then
+                                    CreateHighlightESP(Player)
+                                elseif ESP_METHOD == "DrawingBox" then
+                                    CreateDrawingBoxESP(Player)
+                                end
+                            end
+                        end
+                    end
+                }
+
+                -- Implementasi toggle untuk ESP
+                ESPTab:Toggle{
+                    Name = "ESP",
+                    StartingState = false,
+                    Description = "Toggle ESP On/Off",
+                    Callback = function(state)
+                        ToggleESP(state)
+                        if state then
+                            print("ESP On")
+                        else
+                            print("ESP Off")
+                        end
+                    end
+                }
+
+                -- Slider untuk mengatur ukuran teks nama pemain
+                ESPTab:Slider{
+                    Name = "Name Text Size",
+                    Default = 10,
+                    Min = 0,
+                    Max = 20,
+                    Callback = function(value)
+                        NAME_TEXT_SIZE = value
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo.NameLabel.TextSize = NAME_TEXT_SIZE
+                            end
+                        end
+                    end
+                }
+
+                -- Slider untuk mengatur ukuran teks indikator darah
+                ESPTab:Slider{
+                    Name = "Health Text Size",
+                    Default = 10,
+                    Min = 0,
+                    Max = 20,
+                    Callback = function(value)
+                        HEALTH_TEXT_SIZE = value
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo.HealthLabel.TextSize = HEALTH_TEXT_SIZE
+                            end
+                        end
+                    end
+                }
+
+                -- Slider untuk mengatur ukuran teks jarak pemain
+                ESPTab:Slider{
+                    Name = "Distance Text Size",
+                    Default = 10,
+                    Min = 0,
+                    Max = 20,
+                    Callback = function(value)
+                        DISTANCE_TEXT_SIZE = value
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo.DistanceLabel.TextSize = DISTANCE_TEXT_SIZE
+                            end
+                        end
+                    end
+                }
+
+                -- Implementasi toggle untuk menampilkan nama pemain
+                ESPTab:Toggle{
+                    Name = "Show Player Names",
+                    StartingState = true,
+                    Description = "Toggle showing player names",
+                    Callback = function(state)
+                        SHOW_PLAYER_NAMES = state
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo.NameLabel.Visible = SHOW_PLAYER_NAMES
+                            end
+                        end
+                    end
+                }
+
+                -- Implementasi toggle untuk menampilkan indikator darah
+                ESPTab:Toggle{
+                    Name = "Show Health Indicator",
+                    StartingState = true,
+                    Description = "Toggle showing health indicator",
+                    Callback = function(state)
+                        SHOW_HEALTH_INDICATOR = state
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo.HealthLabel.Visible = SHOW_HEALTH_INDICATOR
+                            end
+                        end
+                    end
+                }
+
+                -- Implementasi toggle untuk menampilkan jarak pemain
+                ESPTab:Toggle{
+                    Name = "Show Distance Indicator",
+                    StartingState = true,
+                    Description = "Toggle showing player distance",
+                    Callback = function(state)
+                        SHOW_DISTANCE = state
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo.DistanceLabel.Visible = SHOW_DISTANCE
+                            end
+                        end
+                    end
+                }
+
+                -- Color picker untuk pemilihan warna indikator distance
+                ESPTab:ColorPicker{
+                    Name = "Distance Indicator Color",
+                    Style = Mercury.ColorPickerStyles.Legacy,
+                    Default = DISTANCE_INDICATOR_COLOR,
+                    Callback = function(color)
+                        DISTANCE_INDICATOR_COLOR = color
+                        UpdateDistanceIndicatorColor()
+                    end
+                }
+
+                -- Implementasi slider untuk jarak ESP
+                ESPTab:Slider{
+                    Name = "Max ESP Distance",
+                    Default = 1000,
+                    Min = 0,
+                    Max = 5000,
+                    Callback = function(value)
+                        MAX_DISTANCE = value
+                    end
+                }
+            end
+            if tabs.aimbotTab then
+                local AimbotTab = GUI:Tab{
+                    Name = tabs.aimbotTab,
+                    Icon = "rbxassetid://"
+                }
+                -- Aimbot
+                -- Ambil kamera dan pemain lokal
+                local camera = game.Workspace.CurrentCamera
+                local player = game.Players.LocalPlayer
+
+                -- Variable untuk menyimpan status locking
+                local isLocking = false
+                local targetPlayer = nil
+                local targetPart = nil
+
+                -- Radius maksimum dari cursor mouse untuk mengunci pemain
+                local maxLockDistance = 100  -- Default value, bisa disesuaikan melalui slider
+                local lockRadius = 50  -- Default value, bisa disesuaikan melalui slider
+                local interpolationSpeed = 0.1  -- Default value, bisa disesuaikan melalui textbox
+
+                -- Buat GUI lingkaran radius
+                local circleGui = Drawing.new("Circle")
+                circleGui.Visible = false  -- Mulai dengan tidak terlihat
+                circleGui.Radius = lockRadius
+                circleGui.Thickness = 2
+                circleGui.Transparency = 1
+                circleGui.Color = Color3.fromRGB(255, 255, 255)  -- Warna putih saat tidak terkunci
+
+                -- Fungsi untuk memperbarui posisi GUI lingkaran radius
+                local function updateCircleGui()
+                    local mousePosition = game:GetService("UserInputService"):GetMouseLocation()
+                    circleGui.Position = Vector2.new(mousePosition.X, mousePosition.Y)
+                end
+
+                -- Fungsi untuk mencari bagian terdekat dari pemain yang masih hidup dalam radius maksimum dari cursor mouse dan kamera
+                local function findNearestLivingPartInRadius(mousePosition)
+                    local nearestPlayer = nil
+                    local nearestPart = nil
+                    local nearestDistance = math.huge
+
+                    -- Ambil posisi kursor mouse di dunia game
+                    local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
+                    local mouseWorldPosition = ray.Origin + ray.Direction * maxLockDistance
+
+                    -- Hitung jarak dari bagian pemain ke posisi kursor mouse dan kamera
+                    local function calculateDistanceToPart(part)
+                        local partPosition = part.Position
+                        -- Jarak dari bagian pemain ke posisi kursor mouse dan kamera
+                        local distance = (partPosition - mouseWorldPosition).Magnitude
+                        return distance
+                    end
+
+                    -- Mengecek apakah bagian pemain terlihat dari sudut pandang kamera
+                    local function isPartVisible(part)
+                        -- Raycast dari kamera ke bagian pemain
+                        local raycastParams = RaycastParams.new()
+                        raycastParams.FilterDescendantsInstances = {part.Parent}
+                        raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
+                        local raycastResult = workspace:Raycast(camera.CFrame.Position, part.Position - camera.CFrame.Position, raycastParams)
+                        if raycastResult and raycastResult.Instance == part then
+                            return true
+                        end
+                        return false
+                    end
+
+                    -- Loop semua pemain
+                    for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+                        if otherPlayer ~= player then
+                            local character = otherPlayer.Character
+                            if character then
+                                -- Cari berbagai jenis humanoid
+                                local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+                                if humanoid and humanoid.Health > 0 then
+                                    -- Periksa apakah pemain berada di tim yang sama (hanya jika ada tim)
+                                    if not otherPlayer.Team or otherPlayer.Team ~= player.Team then
+                                        -- Prioritaskan kepala terlebih dahulu
+                                        local head = character:FindFirstChild("Head")
+                                        if head and isPartVisible(head) then
+                                            local distance = calculateDistanceToPart(head)
+                                            if distance <= maxLockDistance then
+                                                local screenPosition, onScreen = camera:WorldToViewportPoint(head.Position)
+                                                local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(mousePosition.X, mousePosition.Y)).Magnitude
+                                                if cursorDistance <= lockRadius then
+                                                    if not nearestPlayer or distance < nearestDistance then
+                                                        nearestDistance = distance
+                                                        nearestPlayer = otherPlayer
+                                                        nearestPart = head
+                                                        -- Langsung lanjut ke pemain berikutnya, tidak perlu cek bagian lain
+                                                        break
+                                                    end
+                                                end
+                                            end
+                                        end
+
+                                        -- Jika tidak ada kepala yang cocok, periksa bagian lainnya
+                                        if not nearestPlayer or nearestPlayer ~= otherPlayer then
+                                            for _, part in ipairs(character:GetChildren()) do
+                                                if part:IsA("BasePart") and part ~= head then
+                                                    local distance = calculateDistanceToPart(part)
+                                                    if distance <= maxLockDistance and isPartVisible(part) then
+                                                        local screenPosition, onScreen = camera:WorldToViewportPoint(part.Position)
+                                                        local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(mousePosition.X, mousePosition.Y)).Magnitude
+                                                        if cursorDistance <= lockRadius then
+                                                            if not nearestPlayer or distance < nearestDistance then
+                                                                nearestDistance = distance
+                                                                nearestPlayer = otherPlayer
+                                                                nearestPart = part
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+
+                    return nearestPlayer, nearestPart, nearestDistance
+                end
+
+                -- Fungsi untuk mengunci bagian terdekat dari pemain yang masih hidup dalam radius maksimum dari cursor mouse dan kamera
+                local function lockNearestLivingPart()
+                    -- Ambil posisi kursor mouse saat ini
+                    local mousePosition = game:GetService("UserInputService"):GetMouseLocation()
+
+                    local nearestPlayer, nearestPart, nearestDistance = findNearestLivingPartInRadius(mousePosition)
+                    
+                    if nearestPlayer and nearestDistance <= maxLockDistance then
+                        targetPlayer = nearestPlayer
+                        targetPart = nearestPart
+                        circleGui.Color = Color3.fromRGB(255, 0, 0)  -- Ubah warna lingkaran menjadi merah saat mengunci
+                    else
+                        targetPlayer = nil
+                        targetPart = nil
+                        circleGui.Color = Color3.fromRGB(255, 255, 255)  -- Ubah warna lingkaran menjadi putih jika tidak ada yang dikunci
+                    end
+                end
+
+                -- Fungsi untuk memperbarui posisi kamera secara bertahap
+                local function updateCamera()
+                    if targetPlayer and targetPart then
+                        -- Menginterpolasi posisi kamera ke bagian terdekat dari pemain terdekat
+                        local targetCFrame = CFrame.new(camera.CFrame.Position, targetPart.Position)
+                        camera.CFrame = camera.CFrame:Lerp(targetCFrame, interpolationSpeed)  -- kecepatan interpolasi dari textbox
+                    end
+                end
+
+                -- Mendeteksi perubahan state dari toggle
+                local function onToggleStateChanged(state)
+                    if state then
+                        -- Mulai locking
+                        isLocking = true
+                        circleGui.Visible = true  -- Tampilkan GUI lingkaran radius
+                        lockNearestLivingPart()
+                    else
+                        -- Berhenti locking
+                        isLocking = false
+                        targetPlayer = nil
+                        targetPart = nil
+                        circleGui.Visible = false  -- Sembunyikan GUI lingkaran radius
+                        circleGui.Color = Color3.fromRGB(255, 255, 255)  -- Ubah warna lingkaran menjadi putih saat tidak terkunci
+                    end
+                end
+
+                -- Ambil toggle dari GUI
+                AimbotTab:Toggle{
+                    Name = "Aimbot",
+                    StartingState = false,
+                    Description = "Allows you to lock out all players except players on the same team as you.",
+                    Callback = onToggleStateChanged
+                }
+
+                -- Fungsi callback untuk slider maxLockDistance
+                local function onMaxLockDistanceChanged(value)
+                    maxLockDistance = value
+                end
+
+                -- Fungsi callback untuk slider lockRadius
+                local function onLockRadiusChanged(value)
+                    lockRadius = value
+                    circleGui.Radius = value  -- Perbarui radius lingkaran GUI
+                end
+
+                -- Fungsi callback untuk textbox interpolationSpeed
+                local function onInterpolationSpeedChanged(text)
+                    local value = tonumber(text)
+                    if value then
+                        interpolationSpeed = value
+                    else
+                        print("Invalid interpolation speed value.")
+                    end
+                end
+
+                -- Ambil slider untuk lockRadius dari GUI
+                AimbotTab:Slider{
+                    Name = "Lock Radius",
+                    Default = lockRadius,
+                    Min = 0,
+                    Max = 100,  -- Sesuaikan nilai maksimum sesuai kebutuhan
+                    Description = "Change how big the radius can lock players.",
+                    Callback = onLockRadiusChanged
+                }
+
+                -- Ambil slider untuk maxLockDistance dari GUI
+                AimbotTab:Slider{
+                    Name = "Lock Distance",
+                    Default = maxLockDistance,
+                    Min = 0,
+                    Max = 300,  -- Sesuaikan nilai maksimum sesuai kebutuhan
+                    Description = "Change how far you can lock the player.",
+                    Callback = onMaxLockDistanceChanged
+                }
+
+                -- Ambil textbox untuk interpolationSpeed dari GUI
+                AimbotTab:Textbox{
+                    Name = "Interpolation Speed",
+                    Default = tostring(interpolationSpeed),
+                    Description = "How accurate it is when locking the player | Min: 0.1 Max: 1 Recommend: 0.1 | 0.2 | 0.3.",
+                    Callback = onInterpolationSpeedChanged
+                }
+
+                -- Mendeteksi perubahan posisi kursor mouse
+                game:GetService("UserInputService").InputChanged:Connect(function(input)
+                    -- Pastikan input adalah dari pergerakan mouse dan locking sedang aktif
+                    if input.UserInputType == Enum.UserInputType.MouseMovement and isLocking then
+                        -- Panggil fungsi untuk mencari dan mengunci bagian terdekat dari pemain yang masih hidup
+                        lockNearestLivingPart()
+                        -- Perbarui posisi GUI lingkaran radius
+                        updateCircleGui()
+                    end
+                end)
+
+                -- Perbarui posisi kamera secara berkala saat locking aktif
+                game:GetService("RunService").RenderStepped:Connect(function()
+                    if isLocking then
+                        updateCamera()
+                    end
+                end)
+                if tabs.miscTab then
+                    local MiscTab = GUI:Tab{
+                        Name = tabs.miscTab,
+                        Icon = "rbxassetid://"
+                    }
+                    -- Fungsi untuk membuat GUI indikator FPS dan Ping
+                    local function createIndicator()
+                        -- Pastikan tidak ada GUI lain dengan nama yang sama
+                        if game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator") then
+                            game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator"):Destroy()
+                        end
+
+                        local ScreenGui = Instance.new("ScreenGui")
+                        ScreenGui.Name = "FPSPingIndicator"
+                        ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+                        local Frame = Instance.new("Frame")
+                        Frame.Name = "IndicatorFrame"
+                        Frame.Parent = ScreenGui
+                        Frame.Position = UDim2.new(0, 10, 0, 10)
+                        Frame.Size = UDim2.new(0, 180, 0, 50)
+                        Frame.BackgroundTransparency = 0.5
+                        Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+
+                        local FPSText = Instance.new("TextLabel")
+                        FPSText.Name = "FPSText"
+                        FPSText.Parent = Frame
+                        FPSText.Size = UDim2.new(1, 0, 0.5, 0)
+                        FPSText.Position = UDim2.new(0, 0, 0, 0)
+                        FPSText.BackgroundTransparency = 1
+                        FPSText.TextColor3 = Color3.new(1, 1, 1)
+                        FPSText.TextScaled = true
+                        FPSText.Font = Enum.Font.SourceSans
+                        FPSText.Text = "FPS: 0"
+
+                        local PingText = Instance.new("TextLabel")
+                        PingText.Name = "PingText"
+                        PingText.Parent = Frame
+                        PingText.Size = UDim2.new(1, 0, 0.5, 0)
+                        PingText.Position = UDim2.new(0, 0, 0.5, 0)
+                        PingText.BackgroundTransparency = 1
+                        PingText.TextColor3 = Color3.new(1, 1, 1)
+                        PingText.TextScaled = true
+                        PingText.Font = Enum.Font.SourceSans
+                        PingText.Text = "Ping: 0 ms"
+
+                        -- Menghitung FPS
+                        local RunService = game:GetService("RunService")
+                        local LastTime = tick()
+                        local FrameCount = 0
+                        local SmoothFPS = 0
+                        local function lerp(a, b, t)
+                            return a + (b - a) * t
+                        end
+
+                        RunService.RenderStepped:Connect(function()
+                            FrameCount = FrameCount + 1
+                            local CurrentTime = tick()
+                            if CurrentTime - LastTime >= 1 then
+                                local FPS = FrameCount / (CurrentTime - LastTime)
+                                SmoothFPS = lerp(SmoothFPS, FPS, 0.1) -- Interpolasi FPS
+                                FPSText.Text = string.format("FPS: %.2f", SmoothFPS)
+                                FrameCount = 0
+                                LastTime = CurrentTime
+                            end
+                        end)
+
+                        -- Menghitung Ping
+                        local SmoothPing = 0
+                        local function UpdatePing()
+                            while true do
+                                local Ping = game:GetService("Stats"):FindFirstChild("PerformanceStats"):FindFirstChild("Ping")
+                                if Ping then
+                                    local CurrentPing = Ping:GetValue()
+                                    SmoothPing = lerp(SmoothPing, CurrentPing, 0.1) -- Interpolasi Ping
+                                    PingText.Text = string.format("Ping: %d ms", SmoothPing)
+                                end
+                                wait(1)
+                            end
+                        end
+
+                        spawn(UpdatePing)
+                    end
+
+                    -- Fungsi untuk menghapus indikator
+                    local function removeIndicator()
+                        if game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator") then
+                            game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator"):Destroy()
+                        end
+                    end
+
+                    -- Membuat toggle untuk indikator
+                    MiscTab:Toggle{
+                        Name = "Stats",
+                        StartingState = false,
+                        Description = "Shows ping and fps.",
+                        Callback = function(state)
+                            if state then
+                                createIndicator()
+                            else
+                                removeIndicator()
+                            end
+                        end
+                    }
+
+                    -- Mengatur ulang indikator saat respawn
+                    game.Players.LocalPlayer.CharacterAdded:Connect(function()
+                        wait(1) -- Tunggu sedikit waktu agar PlayerGui sudah tersedia
+                        if Tab:GetState("Toggle FPS dan Ping") then
+                            createIndicator()
+                        end
+                    end)
+                end
+            end
+        end
+    },
+    {
+        placeIds = {12137249458},
+        guiName = "[FPS] Gun Grounds FFA",
+        tabs = {
+            playerTab2 = "PLAYER",
+            espTab2 = "ESP",
+            aimbotTab2 = "AIMBOT",
+            miscTab2 = "MISC"
+        },
+        functions = function(GUI, tabs)
+            if tabs.playerTab2 then
+                local PlayerTab2 = GUI:Tab{
+                    Name = tabs.playerTab2,
+                    Icon = "rbxassetid://"
+                }
+                -- Hitbox
+                local Players = game:GetService("Players")
+                local LocalPlayer = Players.LocalPlayer
+                local Teams = game:GetService("Teams")
+
+                -- Variabel untuk menyimpan status toggle dan ukuran hitbox
+                local hitboxEnabled = false
+                local hitboxSize = Vector3.new(15, 15, 15) -- Ukuran hitbox default
+
+                local function modifyHitbox(player)
+                    if player and player.Character and hitboxEnabled then
+                        local rootPart = player.Character:WaitForChild("HumanoidRootPart")
+                        if rootPart then
+                            rootPart.Size = hitboxSize -- Ukuran hitbox berdasarkan slider
+                            rootPart.Transparency = 0.5 -- Membuat hitbox setengah transparan
+                        end
+                    end
+                end
+
+                local function resetHitbox(player)
+                    if player and player.Character then
+                        local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                        if rootPart then
+                            rootPart.Size = Vector3.new(2, 2, 1) -- Ukuran hitbox default
+                            rootPart.Transparency = 1 -- Membuat hitbox tidak transparan
+                        end
+                    end
+                end
+
+                local function onCharacterAdded(character)
+                    local player = Players:GetPlayerFromCharacter(character)
+                    if player and player ~= LocalPlayer then
+                        -- Periksa apakah player berada di tim yang sama atau tidak
+                        if not Teams or not LocalPlayer.Team or player.Team ~= LocalPlayer.Team then
+                            modifyHitbox(player)
+                        end
+                    end
+                end
+
+                local function onPlayerAdded(player)
+                    if player ~= LocalPlayer then
+                        player.CharacterAdded:Connect(onCharacterAdded)
+                        -- Modifikasi hitbox jika karakter sudah ada
+                        if player.Character then
+                            onCharacterAdded(player.Character)
+                        end
+                    end
+                end
+
+                -- Modifikasi hitbox semua pemain yang sudah ada dalam game
+                for _, player in ipairs(Players:GetPlayers()) do
+                    onPlayerAdded(player)
+                end
+
+                -- Hubungkan fungsi onPlayerAdded ke event PlayerAdded
+                Players.PlayerAdded:Connect(onPlayerAdded)
+
+                -- Toggle untuk mengaktifkan/menonaktifkan modifikasi hitbox
+                PlayerTab2:Toggle{
+                    Name = "Hitbox",
+                    StartingState = false,
+                    Description = "Enlarges the player's hitbox",
+                    Callback = function(state)
+                        hitboxEnabled = state
+                        if not state then
+                            -- Reset semua hitbox jika dinonaktifkan
+                            for _, player in ipairs(Players:GetPlayers()) do
+                                resetHitbox(player)
+                            end
+                        else
+                            -- Modifikasi hitbox semua pemain jika diaktifkan
+                            for _, player in ipairs(Players:GetPlayers()) do
+                                if player.Character then
+                                    onCharacterAdded(player.Character)
+                                end
+                            end
+                        end
+                    end
+                }
+                if tabs.espTab2 then
+                    local ESPTab2 = GUI:Tab{
+                        Name = tabs.espTab2,
+                        Icon = "rbxassetid://"
+                    }
+                    -- ESP
+                    -- Local player
+                    local LocalPlayer = game:GetService("Players").LocalPlayer
+                    local Players = game:GetService("Players")
+                    local RunService = game:GetService("RunService")
+
+                    -- Konfigurasi
+                    local ESP_ENABLED = false
+                    local SHOW_PLAYER_NAMES = true
+                    local SHOW_HEALTH_INDICATOR = true
+                    local SHOW_DISTANCE = true
+                    local MAX_DISTANCE = 1000
+                    local NAME_POSITION = "Head"
+                    local NAME_TEXT_SIZE = 10
+                    local HEALTH_TEXT_SIZE = 10
+                    local DISTANCE_TEXT_SIZE = 10
+                    local DISTANCE_COLOR = Color3.fromRGB(255, 255, 0)
+                    local ESP_METHOD = nil
+
+                    -- Fungsi untuk mendapatkan warna tim dengan pengecekan tim kosong
+                    local function GetTeamColor(Player)
+                        if Player.Team then
+                            local teamPlayers = Players:GetPlayers()
+                            local teamHasPlayers = false
+                            for _, teamPlayer in ipairs(teamPlayers) do
+                                if teamPlayer.Team == Player.Team then
+                                    teamHasPlayers = true
+                                    break
+                                end
+                            end
+                            if teamHasPlayers then
+                                return Player.Team.TeamColor.Color
+                            end
+                        end
+                        return Color3.new(1, 1, 1)
+                    end
+
+                    -- Fungsi untuk membuat ESP dengan metode Highlight
+                    local function CreateHighlightESP(Player)
+                        if Player.Character then
+                            local Highlight = Instance.new("Highlight")
+                            Highlight.Adornee = Player.Character
+                            Highlight.FillColor = Color3.new(0, 0, 0)
+                            Highlight.OutlineColor = GetTeamColor(Player)
+                            Highlight.OutlineTransparency = 0
+                            Highlight.FillTransparency = 1
+                            Highlight.Parent = Player.Character
+
+                            local BillboardGui = Instance.new("BillboardGui")
+                            BillboardGui.Size = UDim2.new(0, 200, 0, 60)
+                            BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                            BillboardGui.AlwaysOnTop = true
+                            BillboardGui.Name = "PlayerInfo"
+
+                            local PositionOffset
+                            if NAME_POSITION == "Center" then
+                                PositionOffset = Vector3.new(0, -2, 0)
+                            elseif NAME_POSITION == "Feet" then
+                                PositionOffset = Vector3.new(0, -5, 0)
+                            else
+                                PositionOffset = Vector3.new(0, 2, 0)
+                            end
+
+                            local HealthLabel = Instance.new("TextLabel")
+                            HealthLabel.Parent = BillboardGui
+                            HealthLabel.Name = "HealthLabel"
+                            HealthLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                            HealthLabel.BackgroundTransparency = 1
+                            HealthLabel.TextStrokeTransparency = 0
+                            HealthLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            HealthLabel.TextScaled = false
+                            HealthLabel.TextSize = HEALTH_TEXT_SIZE
+                            HealthLabel.Position = UDim2.new(0, 0, 0, 0)
+                            HealthLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+                            local NameLabel = Instance.new("TextLabel")
+                            NameLabel.Parent = BillboardGui
+                            NameLabel.Name = "NameLabel"
+                            NameLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                            NameLabel.BackgroundTransparency = 1
+                            NameLabel.TextColor3 = GetTeamColor(Player)
+                            NameLabel.TextStrokeTransparency = 0
+                            NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            NameLabel.TextScaled = false
+                            NameLabel.TextSize = NAME_TEXT_SIZE
+                            NameLabel.Position = UDim2.new(0, 0, 0.33, 0)
+                            NameLabel.TextYAlignment = Enum.TextYAlignment.Center
+                            NameLabel.Text = Player.Name
+
+                            local DistanceLabel = Instance.new("TextLabel")
+                            DistanceLabel.Parent = BillboardGui
+                            DistanceLabel.Name = "DistanceLabel"
+                            DistanceLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                            DistanceLabel.BackgroundTransparency = 1
+                            DistanceLabel.TextColor3 = DISTANCE_COLOR
+                            DistanceLabel.TextStrokeTransparency = 0
+                            DistanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            DistanceLabel.TextScaled = false
+                            DistanceLabel.TextSize = DISTANCE_TEXT_SIZE
+                            DistanceLabel.Position = UDim2.new(0, 0, 0.66, 0)
+                            DistanceLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+                            local targetHealth = 100
+                            local displayedHealth = 100
+
+                            local function UpdateHealth()
+                                if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                    targetHealth = Player.Character.Humanoid.Health
+                                end
+                            end
+
+                            UpdateHealth()
+                            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                Player.Character.Humanoid.HealthChanged:Connect(UpdateHealth)
+                            end
+
+                            RunService.RenderStepped:Connect(function()
+                                if ESP_ENABLED and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                    displayedHealth = displayedHealth + (targetHealth - displayedHealth) * 0.1
+
+                                    local healthRatio = displayedHealth / Player.Character.Humanoid.MaxHealth
+                                    local color = Color3.new(1 - healthRatio, healthRatio, 0)
+
+                                    HealthLabel.Text = "(" .. math.floor(displayedHealth) .. ")"
+                                    HealthLabel.TextColor3 = color
+
+                                    local distance = (Player.Character.PrimaryPart.Position - LocalPlayer.Character.PrimaryPart.Position).Magnitude
+                                    DistanceLabel.Text = string.format("%.1f studs", distance)
+
+                                    NameLabel.Visible = SHOW_PLAYER_NAMES
+                                    HealthLabel.Visible = SHOW_HEALTH_INDICATOR
+                                    DistanceLabel.Visible = SHOW_DISTANCE
+                                end
+                            end)
+
+                            BillboardGui.Adornee = Player.Character:FindFirstChild(NAME_POSITION) or Player.Character.PrimaryPart
+                            BillboardGui.StudsOffset = PositionOffset
+                            BillboardGui.Parent = Player.Character
+                        end
+                    end
+
+                    -- Fungsi untuk membuat ESP dengan metode Drawing Box
+                    local function CreateDrawingBoxESP(Player)
+                        if Player.Character then
+                            local BillboardGui = Instance.new("BillboardGui")
+                            BillboardGui.Size = UDim2.new(0, 200, 0, 60)
+                            BillboardGui.StudsOffset = Vector3.new(0, 2, 0)
+                            BillboardGui.AlwaysOnTop = true
+                            BillboardGui.Name = "PlayerInfo"
+
+                            local PositionOffset
+                            if NAME_POSITION == "Center" then
+                                PositionOffset = Vector3.new(0, -2, 0)
+                            elseif NAME_POSITION == "Feet" then
+                                PositionOffset = Vector3.new(0, -5, 0)
+                            else
+                                PositionOffset = Vector3.new(0, 2, 0)
+                            end
+
+                            local HealthLabel = Instance.new("TextLabel")
+                            HealthLabel.Parent = BillboardGui
+                            HealthLabel.Name = "HealthLabel"
+                            HealthLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                            HealthLabel.BackgroundTransparency = 1
+                            HealthLabel.TextStrokeTransparency = 0
+                            HealthLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            HealthLabel.TextScaled = false
+                            HealthLabel.TextSize = HEALTH_TEXT_SIZE
+                            HealthLabel.Position = UDim2.new(0, 0, 0, 0)
+                            HealthLabel.TextYAlignment = Enum.TextYAlignment.Bottom
+
+                            local NameLabel = Instance.new("TextLabel")
+                            NameLabel.Parent = BillboardGui
+                            NameLabel.Name = "NameLabel"
+                            NameLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                            NameLabel.BackgroundTransparency = 1
+                            NameLabel.TextColor3 = GetTeamColor(Player)
+                            NameLabel.TextStrokeTransparency = 0
+                            NameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            NameLabel.TextScaled = false
+                            NameLabel.TextSize = NAME_TEXT_SIZE
+                            NameLabel.Position = UDim2.new(0, 0, 0.33, 0)
+                            NameLabel.TextYAlignment = Enum.TextYAlignment.Center
+                            NameLabel.Text = Player.Name
+
+                            local DistanceLabel = Instance.new("TextLabel")
+                            DistanceLabel.Parent = BillboardGui
+                            DistanceLabel.Name = "DistanceLabel"
+                            DistanceLabel.Size = UDim2.new(1, 0, 0.33, 0)
+                            DistanceLabel.BackgroundTransparency = 1
+                            DistanceLabel.TextColor3 = DISTANCE_COLOR
+                            DistanceLabel.TextStrokeTransparency = 0
+                            DistanceLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+                            DistanceLabel.TextScaled = false
+                            DistanceLabel.TextSize = DISTANCE_TEXT_SIZE
+                            DistanceLabel.Position = UDim2.new(0, 0, 0.66, 0)
+                            DistanceLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+                            local targetHealth = 100
+                            local displayedHealth = 100
+
+                            local function UpdateHealth()
+                                if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                    targetHealth = Player.Character.Humanoid.Health
+                                end
+                            end
+
+                            UpdateHealth()
+                            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                Player.Character.Humanoid.HealthChanged:Connect(UpdateHealth)
+                            end
+
+                            -- Create Drawing Box
+                            local Box = Drawing.new("Square")
+                            Box.Visible = true
+                            Box.Thickness = 2
+                            Box.Transparency = 1
+                            Box.Color = GetTeamColor(Player)
+
+                            RunService.RenderStepped:Connect(function()
+                                if ESP_ENABLED and Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                                    displayedHealth = displayedHealth + (targetHealth - displayedHealth) * 0.1
+
+                                    local healthRatio = displayedHealth / Player.Character.Humanoid.MaxHealth
+                                    local color = Color3.new(1 - healthRatio, healthRatio, 0)
+
+                                    HealthLabel.Text = "(" .. math.floor(displayedHealth) .. ")"
+                                    HealthLabel.TextColor3 = color
+
+                                    local distance = (Player.Character.PrimaryPart.Position - LocalPlayer.Character.PrimaryPart.Position).Magnitude
+                                    DistanceLabel.Text = string.format("%.1f studs", distance)
+
+                                    NameLabel.Visible = SHOW_PLAYER_NAMES
+                                    HealthLabel.Visible = SHOW_HEALTH_INDICATOR
+                                    DistanceLabel.Visible = SHOW_DISTANCE
+
+                                    -- Update Drawing Box
+                                    local RootPart = Player.Character:FindFirstChild("HumanoidRootPart")
+                                    if RootPart then
+                                        local RootPos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(RootPart.Position)
+                                        if onScreen then
+                                            local HeadPos = workspace.CurrentCamera:WorldToViewportPoint(Player.Character.Head.Position)
+                                            local LegPos = workspace.CurrentCamera:WorldToViewportPoint(Player.Character.HumanoidRootPart.Position - Vector3.new(0, 3, 0))
+
+                                            Box.Size = Vector2.new(2000 / distance, HeadPos.Y - LegPos.Y)
+                                            Box.Position = Vector2.new(RootPos.X - Box.Size.X / 2, RootPos.Y - Box.Size.Y / 2)
+                                            Box.Visible = true
+                                        else
+                                            Box.Visible = false
+                                        end
+                                    end
+                                else
+                                    Box.Visible = false
+                                end
+                            end)
+
+                            BillboardGui.Adornee = Player.Character:FindFirstChild(NAME_POSITION) or Player.Character.PrimaryPart
+                            BillboardGui.StudsOffset = PositionOffset
+                            BillboardGui.Parent = Player.Character
+                        end
+                    end
+
+                    -- Fungsi untuk memperbarui warna indikator jarak pada semua pemain
+                    local function UpdateDistanceIndicatorColor()
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo.DistanceLabel.TextColor3 = DISTANCE_INDICATOR_COLOR
+                            end
+                        end
+                    end
+
+                    -- Fungsi untuk membersihkan ESP
+                    local function ClearESP()
+                        for _, Player in pairs(Players:GetPlayers()) do
+                            if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                Player.Character.PlayerInfo:Destroy()
+                            end
+                            if Player.Character and Player.Character:FindFirstChild("Highlight") then
+                                Player.Character.Highlight:Destroy()
+                            end
+                        end
+                    end
+
+                    -- Fungsi untuk mengaktifkan ESP
+                    local function ToggleESP(state)
+                        ESP_ENABLED = state
+                        if ESP_ENABLED then
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if ESP_METHOD == "Highlight" then
+                                    CreateHighlightESP(Player)
+                                elseif ESP_METHOD == "DrawingBox" then
+                                    CreateDrawingBoxESP(Player)
+                                end
+                            end
+                        else
+                            ClearESP()
+                        end
+                    end
+
+                    -- Menambah event listener untuk player baru
+                    Players.PlayerAdded:Connect(function(Player)
+                        Player.CharacterAdded:Connect(function()
+                            if ESP_ENABLED then
+                                wait(1) -- Tunggu sebentar agar karakter terload
+                                if ESP_METHOD == "Highlight" then
+                                    CreateHighlightESP(Player)
+                                elseif ESP_METHOD == "DrawingBox" then
+                                    CreateDrawingBoxESP(Player)
+                                end
+                            end
+                        end)
+                    end)
+
+                    -- Event listener untuk player yang ada
+                    for _, Player in pairs(Players:GetPlayers()) do
+                        Player.CharacterAdded:Connect(function()
+                            if ESP_ENABLED then
+                                wait(1) -- Tunggu sebentar agar karakter terload
+                                if ESP_METHOD == "Highlight" then
+                                    CreateHighlightESP(Player)
+                                elseif ESP_METHOD == "DrawingBox" then
+                                    CreateDrawingBoxESP(Player)
+                                end
+                            end
+                        end)
+                    end
+
+                    -- Dropdown untuk memilih metode ESP
+                    local MyDropdown = ESPTab2:Dropdown{
+                        Name = "ESP Method",
+                        StartingText = "Select...",
+                        Description = nil,
+                        Items = {
+                            {"Highlight", "Highlight"},
+                            {"Box", "DrawingBox"}
+                        },
+                        Callback = function(item)
+                            ESP_METHOD = item
+                            if ESP_ENABLED then
+                                ClearESP()
+                                for _, Player in pairs(Players:GetPlayers()) do
+                                    if ESP_METHOD == "Highlight" then
+                                        CreateHighlightESP(Player)
+                                    elseif ESP_METHOD == "DrawingBox" then
+                                        CreateDrawingBoxESP(Player)
+                                    end
+                                end
+                            end
+                        end
+                    }
+
+                    -- Implementasi toggle untuk ESP
+                    ESPTab2:Toggle{
+                        Name = "ESP",
+                        StartingState = false,
+                        Description = "Toggle ESP On/Off",
+                        Callback = function(state)
+                            ToggleESP(state)
+                            if state then
+                                print("ESP On")
+                            else
+                                print("ESP Off")
+                            end
+                        end
+                    }
+
+                    -- Slider untuk mengatur ukuran teks nama pemain
+                    ESPTab2:Slider{
+                        Name = "Name Text Size",
+                        Default = 10,
+                        Min = 0,
+                        Max = 20,
+                        Callback = function(value)
+                            NAME_TEXT_SIZE = value
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                    Player.Character.PlayerInfo.NameLabel.TextSize = NAME_TEXT_SIZE
+                                end
+                            end
+                        end
+                    }
+
+                    -- Slider untuk mengatur ukuran teks indikator darah
+                    ESPTab2:Slider{
+                        Name = "Health Text Size",
+                        Default = 10,
+                        Min = 0,
+                        Max = 20,
+                        Callback = function(value)
+                            HEALTH_TEXT_SIZE = value
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                    Player.Character.PlayerInfo.HealthLabel.TextSize = HEALTH_TEXT_SIZE
+                                end
+                            end
+                        end
+                    }
+
+                    -- Slider untuk mengatur ukuran teks jarak pemain
+                    ESPTab2:Slider{
+                        Name = "Distance Text Size",
+                        Default = 10,
+                        Min = 0,
+                        Max = 20,
+                        Callback = function(value)
+                            DISTANCE_TEXT_SIZE = value
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                    Player.Character.PlayerInfo.DistanceLabel.TextSize = DISTANCE_TEXT_SIZE
+                                end
+                            end
+                        end
+                    }
+
+                    -- Implementasi toggle untuk menampilkan nama pemain
+                    ESPTab2:Toggle{
+                        Name = "Show Player Names",
+                        StartingState = true,
+                        Description = "Toggle showing player names",
+                        Callback = function(state)
+                            SHOW_PLAYER_NAMES = state
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                    Player.Character.PlayerInfo.NameLabel.Visible = SHOW_PLAYER_NAMES
+                                end
+                            end
+                        end
+                    }
+
+                    -- Implementasi toggle untuk menampilkan indikator darah
+                    ESPTab2:Toggle{
+                        Name = "Show Health Indicator",
+                        StartingState = true,
+                        Description = "Toggle showing health indicator",
+                        Callback = function(state)
+                            SHOW_HEALTH_INDICATOR = state
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                    Player.Character.PlayerInfo.HealthLabel.Visible = SHOW_HEALTH_INDICATOR
+                                end
+                            end
+                        end
+                    }
+
+                    -- Implementasi toggle untuk menampilkan jarak pemain
+                    ESPTab2:Toggle{
+                        Name = "Show Distance Indicator",
+                        StartingState = true,
+                        Description = "Toggle showing player distance",
+                        Callback = function(state)
+                            SHOW_DISTANCE = state
+                            for _, Player in pairs(Players:GetPlayers()) do
+                                if Player.Character and Player.Character:FindFirstChild("PlayerInfo") then
+                                    Player.Character.PlayerInfo.DistanceLabel.Visible = SHOW_DISTANCE
+                                end
+                            end
+                        end
+                    }
+
+                    -- Color picker untuk pemilihan warna indikator distance
+                    ESPTab2:ColorPicker{
+                        Name = "Distance Indicator Color",
+                        Style = Mercury.ColorPickerStyles.Legacy,
+                        Default = DISTANCE_INDICATOR_COLOR,
+                        Callback = function(color)
+                            DISTANCE_INDICATOR_COLOR = color
+                            UpdateDistanceIndicatorColor()
+                        end
+                    }
+
+                    -- Implementasi slider untuk jarak ESP
+                    ESPTab2:Slider{
+                        Name = "Max ESP Distance",
+                        Default = 1000,
+                        Min = 0,
+                        Max = 5000,
+                        Callback = function(value)
+                            MAX_DISTANCE = value
+                        end
+                    }
+                    if tabs.aimbotTab2 then
+                        local AimbotTab2 = GUI:Tab{
+                            Name = tabs.aimbotTab2,
+                            Icon = "rbxassetid://"
+                        }
+                        -- Aimbot
+                        -- Ambil kamera dan pemain lokal
+                        local camera = game.Workspace.CurrentCamera
+                        local player = game.Players.LocalPlayer
+
+                        -- Variable untuk menyimpan status locking
+                        local isLocking = false
+                        local targetPlayer = nil
+                        local targetPart = nil
+
+                        -- Radius maksimum dari cursor mouse untuk mengunci pemain
+                        local maxLockDistance = 100  -- Default value, bisa disesuaikan melalui slider
+                        local lockRadius = 50  -- Default value, bisa disesuaikan melalui slider
+                        local interpolationSpeed = 0.1  -- Default value, bisa disesuaikan melalui textbox
+
+                        -- Buat GUI lingkaran radius
+                        local circleGui = Drawing.new("Circle")
+                        circleGui.Visible = false  -- Mulai dengan tidak terlihat
+                        circleGui.Radius = lockRadius
+                        circleGui.Thickness = 2
+                        circleGui.Transparency = 1
+                        circleGui.Color = Color3.fromRGB(255, 255, 255)  -- Warna putih saat tidak terkunci
+
+                        -- Fungsi untuk memperbarui posisi GUI lingkaran radius
+                        local function updateCircleGui()
+                            local mousePosition = game:GetService("UserInputService"):GetMouseLocation()
+                            circleGui.Position = Vector2.new(mousePosition.X, mousePosition.Y)
+                        end
+
+                        -- Fungsi untuk mencari bagian terdekat dari pemain yang masih hidup dalam radius maksimum dari cursor mouse dan kamera
+                        local function findNearestLivingPartInRadius(mousePosition)
+                            local nearestPlayer = nil
+                            local nearestPart = nil
+                            local nearestDistance = math.huge
+
+                            -- Ambil posisi kursor mouse di dunia game
+                            local ray = camera:ViewportPointToRay(mousePosition.X, mousePosition.Y)
+                            local mouseWorldPosition = ray.Origin + ray.Direction * maxLockDistance
+
+                            -- Hitung jarak dari bagian pemain ke posisi kursor mouse dan kamera
+                            local function calculateDistanceToPart(part)
+                                local partPosition = part.Position
+                                -- Jarak dari bagian pemain ke posisi kursor mouse dan kamera
+                                local distance = (partPosition - mouseWorldPosition).Magnitude
+                                return distance
+                            end
+
+                            -- Mengecek apakah bagian pemain terlihat dari sudut pandang kamera
+                            local function isPartVisible(part)
+                                -- Raycast dari kamera ke bagian pemain
+                                local raycastParams = RaycastParams.new()
+                                raycastParams.FilterDescendantsInstances = {part.Parent}
+                                raycastParams.FilterType = Enum.RaycastFilterType.Whitelist
+                                local raycastResult = workspace:Raycast(camera.CFrame.Position, part.Position - camera.CFrame.Position, raycastParams)
+                                if raycastResult and raycastResult.Instance == part then
+                                    return true
+                                end
+                                return false
+                            end
+
+                            -- Loop semua pemain
+                            for _, otherPlayer in ipairs(game.Players:GetPlayers()) do
+                                if otherPlayer ~= player then
+                                    local character = otherPlayer.Character
+                                    if character then
+                                        -- Cari berbagai jenis humanoid
+                                        local humanoid = character:FindFirstChildWhichIsA("Humanoid")
+                                        if humanoid and humanoid.Health > 0 then
+                                            -- Periksa apakah pemain berada di tim yang sama (hanya jika ada tim)
+                                            if not otherPlayer.Team or otherPlayer.Team ~= player.Team then
+                                                -- Prioritaskan kepala terlebih dahulu
+                                                local head = character:FindFirstChild("Head")
+                                                if head and isPartVisible(head) then
+                                                    local distance = calculateDistanceToPart(head)
+                                                    if distance <= maxLockDistance then
+                                                        local screenPosition, onScreen = camera:WorldToViewportPoint(head.Position)
+                                                        local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(mousePosition.X, mousePosition.Y)).Magnitude
+                                                        if cursorDistance <= lockRadius then
+                                                            if not nearestPlayer or distance < nearestDistance then
+                                                                nearestDistance = distance
+                                                                nearestPlayer = otherPlayer
+                                                                nearestPart = head
+                                                                -- Langsung lanjut ke pemain berikutnya, tidak perlu cek bagian lain
+                                                                break
+                                                            end
+                                                        end
+                                                    end
+                                                end
+
+                                                -- Jika tidak ada kepala yang cocok, periksa bagian lainnya
+                                                if not nearestPlayer or nearestPlayer ~= otherPlayer then
+                                                    for _, part in ipairs(character:GetChildren()) do
+                                                        if part:IsA("BasePart") and part ~= head then
+                                                            local distance = calculateDistanceToPart(part)
+                                                            if distance <= maxLockDistance and isPartVisible(part) then
+                                                                local screenPosition, onScreen = camera:WorldToViewportPoint(part.Position)
+                                                                local cursorDistance = (Vector2.new(screenPosition.X, screenPosition.Y) - Vector2.new(mousePosition.X, mousePosition.Y)).Magnitude
+                                                                if cursorDistance <= lockRadius then
+                                                                    if not nearestPlayer or distance < nearestDistance then
+                                                                        nearestDistance = distance
+                                                                        nearestPlayer = otherPlayer
+                                                                        nearestPart = part
+                                                                    end
+                                                                end
+                                                            end
+                                                        end
+                                                    end
+                                                end
+                                            end
+                                        end
+                                    end
+                                end
+                            end
+
+                            return nearestPlayer, nearestPart, nearestDistance
+                        end
+
+                        -- Fungsi untuk mengunci bagian terdekat dari pemain yang masih hidup dalam radius maksimum dari cursor mouse dan kamera
+                        local function lockNearestLivingPart()
+                            -- Ambil posisi kursor mouse saat ini
+                            local mousePosition = game:GetService("UserInputService"):GetMouseLocation()
+
+                            local nearestPlayer, nearestPart, nearestDistance = findNearestLivingPartInRadius(mousePosition)
+                            
+                            if nearestPlayer and nearestDistance <= maxLockDistance then
+                                targetPlayer = nearestPlayer
+                                targetPart = nearestPart
+                                circleGui.Color = Color3.fromRGB(255, 0, 0)  -- Ubah warna lingkaran menjadi merah saat mengunci
+                            else
+                                targetPlayer = nil
+                                targetPart = nil
+                                circleGui.Color = Color3.fromRGB(255, 255, 255)  -- Ubah warna lingkaran menjadi putih jika tidak ada yang dikunci
+                            end
+                        end
+
+                        -- Fungsi untuk memperbarui posisi kamera secara bertahap
+                        local function updateCamera()
+                            if targetPlayer and targetPart then
+                                -- Menginterpolasi posisi kamera ke bagian terdekat dari pemain terdekat
+                                local targetCFrame = CFrame.new(camera.CFrame.Position, targetPart.Position)
+                                camera.CFrame = camera.CFrame:Lerp(targetCFrame, interpolationSpeed)  -- kecepatan interpolasi dari textbox
+                            end
+                        end
+
+                        -- Mendeteksi perubahan state dari toggle
+                        local function onToggleStateChanged(state)
+                            if state then
+                                -- Mulai locking
+                                isLocking = true
+                                circleGui.Visible = true  -- Tampilkan GUI lingkaran radius
+                                lockNearestLivingPart()
+                            else
+                                -- Berhenti locking
+                                isLocking = false
+                                targetPlayer = nil
+                                targetPart = nil
+                                circleGui.Visible = false  -- Sembunyikan GUI lingkaran radius
+                                circleGui.Color = Color3.fromRGB(255, 255, 255)  -- Ubah warna lingkaran menjadi putih saat tidak terkunci
+                            end
+                        end
+
+                        -- Ambil toggle dari GUI
+                        AimbotTab2:Toggle{
+                            Name = "Aimbot",
+                            StartingState = false,
+                            Description = "Allows you to lock out all players except players on the same team as you.",
+                            Callback = onToggleStateChanged
+                        }
+
+                        -- Fungsi callback untuk slider maxLockDistance
+                        local function onMaxLockDistanceChanged(value)
+                            maxLockDistance = value
+                        end
+
+                        -- Fungsi callback untuk slider lockRadius
+                        local function onLockRadiusChanged(value)
+                            lockRadius = value
+                            circleGui.Radius = value  -- Perbarui radius lingkaran GUI
+                        end
+
+                        -- Fungsi callback untuk textbox interpolationSpeed
+                        local function onInterpolationSpeedChanged(text)
+                            local value = tonumber(text)
+                            if value then
+                                interpolationSpeed = value
+                            else
+                                print("Invalid interpolation speed value.")
+                            end
+                        end
+
+                        -- Ambil slider untuk lockRadius dari GUI
+                        AimbotTab2:Slider{
+                            Name = "Lock Radius",
+                            Default = lockRadius,
+                            Min = 0,
+                            Max = 100,  -- Sesuaikan nilai maksimum sesuai kebutuhan
+                            Description = "Change how big the radius can lock players.",
+                            Callback = onLockRadiusChanged
+                        }
+
+                        -- Ambil slider untuk maxLockDistance dari GUI
+                        AimbotTab2:Slider{
+                            Name = "Lock Distance",
+                            Default = maxLockDistance,
+                            Min = 0,
+                            Max = 300,  -- Sesuaikan nilai maksimum sesuai kebutuhan
+                            Description = "Change how far you can lock the player.",
+                            Callback = onMaxLockDistanceChanged
+                        }
+
+                        -- Ambil textbox untuk interpolationSpeed dari GUI
+                        AimbotTab2:Textbox{
+                            Name = "Interpolation Speed",
+                            Default = tostring(interpolationSpeed),
+                            Description = "How accurate it is when locking the player | Min: 0.1 Max: 1 Recommend: 0.1 | 0.2 | 0.3.",
+                            Callback = onInterpolationSpeedChanged
+                        }
+
+                        -- Mendeteksi perubahan posisi kursor mouse
+                        game:GetService("UserInputService").InputChanged:Connect(function(input)
+                            -- Pastikan input adalah dari pergerakan mouse dan locking sedang aktif
+                            if input.UserInputType == Enum.UserInputType.MouseMovement and isLocking then
+                                -- Panggil fungsi untuk mencari dan mengunci bagian terdekat dari pemain yang masih hidup
+                                lockNearestLivingPart()
+                                -- Perbarui posisi GUI lingkaran radius
+                                updateCircleGui()
+                            end
+                        end)
+
+                        -- Perbarui posisi kamera secara berkala saat locking aktif
+                        game:GetService("RunService").RenderStepped:Connect(function()
+                            if isLocking then
+                                updateCamera()
+                            end
+                        end)
+                        if tabs.miscTab2 then
+                            local MiscTab2 = GUI:Tab{
+                                Name = tabs.miscTab2,
+                                Icon = "rbxassetid://"
+                            }
+                            -- Fungsi untuk membuat GUI indikator FPS dan Ping
+                            local function createIndicator()
+                                -- Pastikan tidak ada GUI lain dengan nama yang sama
+                                if game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator") then
+                                    game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator"):Destroy()
+                                end
+        
+                                local ScreenGui = Instance.new("ScreenGui")
+                                ScreenGui.Name = "FPSPingIndicator"
+                                ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        
+                                local Frame = Instance.new("Frame")
+                                Frame.Name = "IndicatorFrame"
+                                Frame.Parent = ScreenGui
+                                Frame.Position = UDim2.new(0, 10, 0, 10)
+                                Frame.Size = UDim2.new(0, 180, 0, 50)
+                                Frame.BackgroundTransparency = 0.5
+                                Frame.BackgroundColor3 = Color3.new(0, 0, 0)
+        
+                                local FPSText = Instance.new("TextLabel")
+                                FPSText.Name = "FPSText"
+                                FPSText.Parent = Frame
+                                FPSText.Size = UDim2.new(1, 0, 0.5, 0)
+                                FPSText.Position = UDim2.new(0, 0, 0, 0)
+                                FPSText.BackgroundTransparency = 1
+                                FPSText.TextColor3 = Color3.new(1, 1, 1)
+                                FPSText.TextScaled = true
+                                FPSText.Font = Enum.Font.SourceSans
+                                FPSText.Text = "FPS: 0"
+        
+                                local PingText = Instance.new("TextLabel")
+                                PingText.Name = "PingText"
+                                PingText.Parent = Frame
+                                PingText.Size = UDim2.new(1, 0, 0.5, 0)
+                                PingText.Position = UDim2.new(0, 0, 0.5, 0)
+                                PingText.BackgroundTransparency = 1
+                                PingText.TextColor3 = Color3.new(1, 1, 1)
+                                PingText.TextScaled = true
+                                PingText.Font = Enum.Font.SourceSans
+                                PingText.Text = "Ping: 0 ms"
+        
+                                -- Menghitung FPS
+                                local RunService = game:GetService("RunService")
+                                local LastTime = tick()
+                                local FrameCount = 0
+                                local SmoothFPS = 0
+                                local function lerp(a, b, t)
+                                    return a + (b - a) * t
+                                end
+        
+                                RunService.RenderStepped:Connect(function()
+                                    FrameCount = FrameCount + 1
+                                    local CurrentTime = tick()
+                                    if CurrentTime - LastTime >= 1 then
+                                        local FPS = FrameCount / (CurrentTime - LastTime)
+                                        SmoothFPS = lerp(SmoothFPS, FPS, 0.1) -- Interpolasi FPS
+                                        FPSText.Text = string.format("FPS: %.2f", SmoothFPS)
+                                        FrameCount = 0
+                                        LastTime = CurrentTime
+                                    end
+                                end)
+        
+                                -- Menghitung Ping
+                                local SmoothPing = 0
+                                local function UpdatePing()
+                                    while true do
+                                        local Ping = game:GetService("Stats"):FindFirstChild("PerformanceStats"):FindFirstChild("Ping")
+                                        if Ping then
+                                            local CurrentPing = Ping:GetValue()
+                                            SmoothPing = lerp(SmoothPing, CurrentPing, 0.1) -- Interpolasi Ping
+                                            PingText.Text = string.format("Ping: %d ms", SmoothPing)
+                                        end
+                                        wait(1)
+                                    end
+                                end
+        
+                                spawn(UpdatePing)
+                            end
+        
+                            -- Fungsi untuk menghapus indikator
+                            local function removeIndicator()
+                                if game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator") then
+                                    game.Players.LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FPSPingIndicator"):Destroy()
+                                end
+                            end
+        
+                            -- Membuat toggle untuk indikator
+                            MiscTab2:Toggle{
+                                Name = "Stats",
+                                StartingState = false,
+                                Description = "Shows ping and fps.",
+                                Callback = function(state)
+                                    if state then
+                                        createIndicator()
+                                    else
+                                        removeIndicator()
+                                    end
+                                end
+                            }
+        
+                            -- Mengatur ulang indikator saat respawn
+                            game.Players.LocalPlayer.CharacterAdded:Connect(function()
+                                wait(1) -- Tunggu sedikit waktu agar PlayerGui sudah tersedia
+                                if Tab:GetState("Toggle FPS dan Ping") then
+                                    createIndicator()
+                                end
+                            end)
+                        end
+                    end
+                end
+            end
+        end
+    }
+}
+
+-- Fungsi untuk mendapatkan nama GUI berdasarkan ID tempat game
+local function getGameInfo()
+    for _, gameInfo in ipairs(gameNames) do
+        for _, placeId in ipairs(gameInfo.placeIds) do
+            if game.PlaceId == placeId then
+                return gameInfo
+            end
+        end
+    end
+    return { guiName = "Game Tidak Dikenal", tabs = { playerTab = "Player", espTab = "ESP", aimbotTab = "Aimbot" }, functions = function() end }
+end
+
+-- Fungsi untuk memeriksa apakah game saat ini didukung
+local function isSupportedGame()
+    for _, gameInfo in ipairs(gameNames) do
+        for _, placeId in ipairs(gameInfo.placeIds) do
+            if game.PlaceId == placeId then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Membuat GUI loading dengan animasi
+local function createLoadingGUI()
+    local loadingGUI = Instance.new("ScreenGui")
+    local loadingFrame = Instance.new("Frame")
+    local loadingText = Instance.new("TextLabel")
+    local UICorner = Instance.new("UICorner")
+    local UIStroke = Instance.new("UIStroke")
+
+    loadingGUI.Name = "LoadingGUI"
+    loadingGUI.Parent = game.CoreGui
+
+    loadingFrame.Size = UDim2.new(0.3, 0, 0.15, 0)
+    loadingFrame.Position = UDim2.new(0.35, 0, 1, 0)
+    loadingFrame.BackgroundColor3 = Color3.fromRGB(19, 7, 30)
+    loadingFrame.BackgroundTransparency = 0.2
+    loadingFrame.BorderSizePixel = 0
+    loadingFrame.Parent = loadingGUI
+
+    UICorner.CornerRadius = UDim.new(0, 15)
+    UICorner.Parent = loadingFrame
+
+    UIStroke.Parent = loadingFrame
+    UIStroke.Thickness = 2
+    UIStroke.Color = Color3.fromRGB(255, 255, 255)
+    UIStroke.Transparency = 0.5
+
+    loadingText.Size = UDim2.new(1, 0, 1, 0)
+    loadingText.Text = "Checking games"
+    loadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loadingText.BackgroundTransparency = 1
+    loadingText.Font = Enum.Font.GothamBold
+    loadingText.TextSize = 24
+    loadingText.Parent = loadingFrame
+
+    -- Animasi titik-titik pada teks "Checking games"
+    local checking = true
+    spawn(function()
+        while checking do
+            for i = 1, 3 do
+                if not checking then break end
+                loadingText.Text = "Checking games" .. string.rep(".", i)
+                wait(0.5)
+            end
+        end
+    end)
+
+    -- Animasi GUI muncul dengan efek bounce yang lebih smooth
+    local tweenIn = game:GetService("TweenService"):Create(loadingFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.35, 0, 0.45, 0)})
+    tweenIn:Play()
+
+    return loadingGUI, loadingFrame, loadingText, function() checking = false end
+end
+
+local loadingGUI, loadingFrame, loadingText, stopCheckingAnimation = createLoadingGUI()
+
+-- Fungsi untuk mengeluarkan pemain dari game yang tidak didukung
+local function kickPlayerIfUnsupportedGame()
+    wait(2) -- Tunggu 2 detik sebelum memeriksa
+    if not isSupportedGame() then
+        stopCheckingAnimation()
+        local kicking = true
+        spawn(function()
+            while kicking do
+                for i = 1, 3 do
+                    if not kicking then break end
+                    loadingText.Text = "Game not supported. Kicking player" .. string.rep(".", i)
+                    wait(0.5)
+                end
+            end
+        end)
+        wait(3) -- Tampilkan pesan selama 3 detik sebelum mengeluarkan pemain
+        kicking = false
+        game:GetService("Players").LocalPlayer:Kick("Does not support for this game.")
+        return false -- Mengembalikan false jika game tidak didukung
+    end
+    return true -- Mengembalikan true jika game didukung
+end
+
+-- Fungsi untuk mengisi GUI input kunci dengan animasi
+local function createKeyInputGUI(callback)
+    local keyGUI = Instance.new("ScreenGui")
+    local keyFrame = Instance.new("Frame")
+    local keyText = Instance.new("TextLabel")
+    local keyBox = Instance.new("TextBox")
+    local submitButton = Instance.new("TextButton")
+    local closeButton = Instance.new("TextButton")
+    local aboutButton = Instance.new("TextButton")
+    local faqButton = Instance.new("TextButton")
+    local errorMessage = Instance.new("TextLabel")
+    local successMessage = Instance.new("TextLabel")
+    local description = Instance.new("TextLabel")
+    local discordButton = Instance.new("TextButton")
+    local creditText = Instance.new("TextLabel")
+    local UICornerFrame = Instance.new("UICorner")
+    local UICornerButton = Instance.new("UICorner")
+    local UICornerDiscordButton = Instance.new("UICorner")
+    local UICornerKeyBox = Instance.new("UICorner")
+    local UICornerCloseButton = Instance.new("UICorner")
+    local UICornerAboutButton = Instance.new("UICorner")
+    local UICornerFAQButton = Instance.new("UICorner")
+    local UIStroke = Instance.new("UIStroke")
+
+    keyGUI.Name = "KeyInputGUI"
+    keyGUI.Parent = game.CoreGui
+
+    keyFrame.Size = UDim2.new(0.3, 0, 0.6, 0)
+    keyFrame.Position = UDim2.new(0.35, 0, 1, 0)
+    keyFrame.BackgroundColor3 = Color3.fromRGB(19, 7, 30)
+    keyFrame.BackgroundTransparency = 0.2
+    keyFrame.BorderSizePixel = 0
+    keyFrame.Parent = keyGUI
+
+    UICornerFrame.CornerRadius = UDim.new(0, 15)
+    UICornerFrame.Parent = keyFrame
+
+    UIStroke.Parent = keyFrame
+    UIStroke.Thickness = 2
+    UIStroke.Color = Color3.fromRGB(255, 255, 255)
+    UIStroke.Transparency = 0.5
+
+    keyText.Size = UDim2.new(1, 0, 0.15, 0)
+    keyText.Position = UDim2.new(0, 0, 0.01, 0)
+    keyText.Text = "CanCantHUB"
+    keyText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyText.BackgroundTransparency = 1
+    keyText.Font = Enum.Font.GothamBold
+    keyText.TextSize = 24
+    keyText.Parent = keyFrame
+
+    keyBox.Size = UDim2.new(0.8, 0, 0.15, 0)
+    keyBox.Position = UDim2.new(0.1, 0, 0.13, 0)
+    keyBox.Text = ""
+    keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyBox.BackgroundTransparency = 0.1
+    keyBox.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    keyBox.BorderSizePixel = 0
+    keyBox.Font = Enum.Font.Gotham
+    keyBox.TextSize = 18
+    keyBox.TextScaled = true -- Mengatur teks agar berskala otomatis
+    keyBox.TextWrapped = true -- Membungkus teks agar tetap berada dalam batas
+    keyBox.Parent = keyFrame
+
+    UICornerKeyBox.CornerRadius = UDim.new(0, 10)
+    UICornerKeyBox.Parent = keyBox
+
+    submitButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    submitButton.Position = UDim2.new(0.1, 0, 0.33, 0)
+    submitButton.Text = "Enter"
+    submitButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    submitButton.BackgroundTransparency = 0.1
+    submitButton.BorderSizePixel = 0
+    submitButton.Font = Enum.Font.GothamBold
+    submitButton.TextSize = 18
+    submitButton.Parent = keyFrame
+
+    UICornerButton.CornerRadius = UDim.new(0, 10)
+    UICornerButton.Parent = submitButton
+
+    closeButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    closeButton.Position = UDim2.new(0.1, 0, 0.45, 0)
+    closeButton.Text = "Close"
+    closeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    closeButton.BackgroundTransparency = 0.1
+    closeButton.BorderSizePixel = 0
+    closeButton.Font = Enum.Font.GothamBold
+    closeButton.TextSize = 18
+    closeButton.Parent = keyFrame
+
+    UICornerCloseButton.CornerRadius = UDim.new(0, 10)
+    UICornerCloseButton.Parent = closeButton
+
+    closeButton.MouseButton1Click:Connect(function()
+        local tweenOut = game:GetService("TweenService"):Create(keyFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.35, 0, 1, 0)})
+        tweenOut:Play()
+        tweenOut.Completed:Connect(function()
+            keyGUI:Destroy()
+        end)
+    end)
+
+    description.Size = UDim2.new(1, 0, 0.1, 0)
+    description.Position = UDim2.new(0, 0, 0.65, 0)
+    description.Text = "Join our Discord for Key and Updates."
+    description.TextColor3 = Color3.fromRGB(255, 255, 255)
+    description.BackgroundTransparency = 1
+    description.Font = Enum.Font.Gotham
+    description.TextSize = 16
+    description.Parent = keyFrame
+
+    discordButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    discordButton.Position = UDim2.new(0.1, 0, 0.74, 0)
+    discordButton.Text = "Discord"
+    discordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    discordButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    discordButton.BackgroundTransparency = 0.1
+    discordButton.BorderSizePixel = 0
+    discordButton.Font = Enum.Font.GothamBold
+    discordButton.TextSize = 18
+    discordButton.Parent = keyFrame
+
+    UICornerDiscordButton.CornerRadius = UDim.new(0, 10)
+    UICornerDiscordButton.Parent = discordButton
+
+    aboutButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    aboutButton.Position = UDim2.new(0.1, 0, 0.57, 0)
+    aboutButton.Text = "About"
+    aboutButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    aboutButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    aboutButton.BackgroundTransparency = 0.1
+    aboutButton.BorderSizePixel = 0
+    aboutButton.Font = Enum.Font.GothamBold
+    aboutButton.TextSize = 18
+    aboutButton.Parent = keyFrame
+
+    UICornerAboutButton.CornerRadius = UDim.new(0, 10)
+    UICornerAboutButton.Parent = aboutButton
+
+    faqButton.Size = UDim2.new(0.8, 0, 0.1, 0)
+    faqButton.Position = UDim2.new(0.1, 0, 0.86, 0)
+    faqButton.Text = "FAQ"
+    faqButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    faqButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    faqButton.BackgroundTransparency = 0.1
+    faqButton.BorderSizePixel = 0
+    faqButton.Font = Enum.Font.GothamBold
+    faqButton.TextSize = 18
+    faqButton.Parent = keyFrame
+
+    UICornerFAQButton.CornerRadius = UDim.new(0, 10)
+    UICornerFAQButton.Parent = faqButton
+
+    errorMessage.Size = UDim2.new(1, 0, 0.1, 0)
+    errorMessage.Position = UDim2.new(0, 0, 0.26, 0)
+    errorMessage.Text = ""
+    errorMessage.TextColor3 = Color3.fromRGB(255, 0, 0)
+    errorMessage.BackgroundTransparency = 1
+    errorMessage.Font = Enum.Font.GothamBold
+    errorMessage.TextSize = 16
+    errorMessage.Parent = keyFrame
+
+    successMessage.Size = UDim2.new(1, 0, 0.1, 0)
+    successMessage.Position = UDim2.new(0, 0, 0.26, 0)
+    successMessage.Text = ""
+    successMessage.TextColor3 = Color3.fromRGB(0, 255, 0)
+    successMessage.BackgroundTransparency = 1
+    successMessage.Font = Enum.Font.GothamBold
+    successMessage.TextSize = 16
+    successMessage.Parent = keyFrame
+
+    creditText.Size = UDim2.new(1, 0, 0.05, 0)
+    creditText.Position = UDim2.new(0, 0, 0.95, 0)
+    creditText.Text = "Credits Key System: Gi"
+    creditText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    creditText.TextXAlignment = Enum.TextXAlignment.Left
+    creditText.BackgroundTransparency = 1
+    creditText.Font = Enum.Font.Gotham
+    creditText.TextSize = 14
+    creditText.Parent = keyFrame
+
+    discordButton.MouseButton1Click:Connect(function()
+        setclipboard("https://discord.gg/DButHVVX9Y")
+        discordButton.Text = "Link Copied"
+        wait(2)
+        discordButton.Text = "Discord"
+    end)
+
+    submitButton.MouseButton1Click:Connect(function()
+        if keyBox.Text == "" then
+            errorMessage.Text = "Please enter your key."
+            successMessage.Text = ""
+            wait(2)
+            errorMessage.Text = ""
+            return
+        end
+
+        local checkingAnimation = true
+        spawn(function()
+            while checkingAnimation do
+                for i = 1, 3 do
+                    if not checkingAnimation then break end
+                    submitButton.Text = "Checking key" .. string.rep(".", i)
+                    wait(0.5)
+                end
+            end
+        end)
+
+        spawn(function()
+            wait(2) -- Simulasi waktu pengecekan kunci
+            checkingAnimation = false
+
+            if callback(keyBox.Text) then
+                local acceptedAnimation = true
+                spawn(function()
+                    while acceptedAnimation do
+                        for i = 1, 3 do
+                            if not acceptedAnimation then break end
+                            successMessage.Text = "Key Accepted. Loading" .. string.rep(".", i)
+                            wait(0.5)
+                        end
+                    end
+                end)
+
+                submitButton.Text = "Enter"
+                errorMessage.Text = ""
+                wait(2) -- Tampilkan pesan sukses selama 2 detik
+                successMessage.Text = ""
+                acceptedAnimation = false
+                local tweenOut = game:GetService("TweenService"):Create(keyFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.35, 0, 1, 0)})
+                tweenOut:Play()
+                tweenOut.Completed:Connect(function()
+                    keyGUI:Destroy()
+
+                    -- Membuat GUI utama setelah GUI key dihapus
+                    local gameInfo = getGameInfo()
+                    local GUI = Mercury:Create{
+                        Name = gameInfo.guiName,
+                        Size = UDim2.fromOffset(600, 400),
+                        Theme = Mercury.Themes.Dark,
+                        Link = gameInfo.guiName -- Gantilah dengan tautan yang sesuai
+                    }
+
+                    -- Menambahkan bagian notifikasi dan kredit yang diminta
+                    GUI:Notification{
+                        Title = "CanCantHUB | " .. gameInfo.guiName,
+                        Text = "Successfully Loaded CanCantHUB | " .. gameInfo.guiName,
+                        Duration = 3,
+                        Callback = function() end
+                    }
+                    GUI:Credit{
+                        Name = "Gi",
+                        Description = "CanCantHUB | " .. gameInfo.guiName,
+                        Discord = "https://discord.gg/DButHVVX9Y"
+                    }
+
+                    gameInfo.functions(GUI, gameInfo.tabs)
+                end)
+            else
+                submitButton.Text = "Enter"
+                successMessage.Text = ""
+                errorMessage.Text = "Invalid Key. Please try again."
+                wait(2)
+                errorMessage.Text = ""
+            end
+        end)
+    end)
+
+    aboutButton.MouseButton1Click:Connect(function()
+        local aboutGUI = Instance.new("ScreenGui")
+        local aboutFrame = Instance.new("Frame")
+        local aboutText = Instance.new("TextLabel")
+        local aboutCloseButton = Instance.new("TextButton")
+        local UICornerAboutFrame = Instance.new("UICorner")
+        local UICornerAboutCloseButton = Instance.new("UICorner")
+        local UIStrokeAbout = Instance.new("UIStroke")
+
+        aboutGUI.Name = "AboutGUI"
+        aboutGUI.Parent = game.CoreGui
+
+        aboutFrame.Size = UDim2.new(0.3, 0, 0.3, 0)
+        aboutFrame.Position = UDim2.new(0.35, 0, 1, 0)
+        aboutFrame.BackgroundColor3 = Color3.fromRGB(19, 7, 30)
+        aboutFrame.BackgroundTransparency = 0.2
+        aboutFrame.BorderSizePixel = 0
+        aboutFrame.Parent = aboutGUI
+
+        UICornerAboutFrame.CornerRadius = UDim.new(0, 15)
+        UICornerAboutFrame.Parent = aboutFrame
+
+        UIStrokeAbout.Parent = aboutFrame
+        UIStrokeAbout.Thickness = 2
+        UIStrokeAbout.Color = Color3.fromRGB(255, 255, 255)
+        UIStrokeAbout.Transparency = 0.5
+
+        aboutText.Size = UDim2.new(1, 0, 0.7, 0)
+        aboutText.Position = UDim2.new(0, 0, 0, 0)
+        aboutText.Text = "This is a key system created by Gi. Please enter the provided key to access the main GUI."
+        aboutText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        aboutText.BackgroundTransparency = 1
+        aboutText.Font = Enum.Font.Gotham
+        aboutText.TextSize = 18
+        aboutText.TextWrapped = true
+        aboutText.Parent = aboutFrame
+
+        aboutCloseButton.Size = UDim2.new(0.8, 0, 0.15, 0)
+        aboutCloseButton.Position = UDim2.new(0.1, 0, 0.75, 0)
+        aboutCloseButton.Text = "Close"
+        aboutCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        aboutCloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        aboutCloseButton.BackgroundTransparency = 0.1
+        aboutCloseButton.BorderSizePixel = 0
+        aboutCloseButton.Font = Enum.Font.GothamBold
+        aboutCloseButton.TextSize = 18
+        aboutCloseButton.Parent = aboutFrame
+
+        UICornerAboutCloseButton.CornerRadius = UDim.new(0, 10)
+        UICornerAboutCloseButton.Parent = aboutCloseButton
+
+        aboutCloseButton.MouseButton1Click:Connect(function()
+            local tweenOut = game:GetService("TweenService"):Create(aboutFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.35, 0, 1, 0)})
+            tweenOut:Play()
+            tweenOut.Completed:Connect(function()
+                aboutGUI:Destroy()
+            end)
+        end)
+
+        -- Animasi munculnya GUI about dengan efek bounce yang lebih smooth
+        aboutFrame.Position = UDim2.new(0.35, 0, 1, 0)
+        local tweenIn = game:GetService("TweenService"):Create(aboutFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.35, 0, 0.35, 0)})
+        tweenIn:Play()
+    end)
+
+    faqButton.MouseButton1Click:Connect(function()
+        local faqGUI = Instance.new("ScreenGui")
+        local faqFrame = Instance.new("Frame")
+        local faqText = Instance.new("TextLabel")
+        local faqCloseButton = Instance.new("TextButton")
+        local UICornerFAQFrame = Instance.new("UICorner")
+        local UICornerFAQCloseButton = Instance.new("UICorner")
+        local UIStrokeFAQ = Instance.new("UIStroke")
+
+        faqGUI.Name = "FAQGUI"
+        faqGUI.Parent = game.CoreGui
+
+        faqFrame.Size = UDim2.new(0.4, 0, 0.4, 0)
+        faqFrame.Position = UDim2.new(0.3, 0, 1, 0)
+        faqFrame.BackgroundColor3 = Color3.fromRGB(19, 7, 30)
+        faqFrame.BackgroundTransparency = 0.2
+        faqFrame.BorderSizePixel = 0
+        faqFrame.Parent = faqGUI
+
+        UICornerFAQFrame.CornerRadius = UDim.new(0, 15)
+        UICornerFAQFrame.Parent = faqFrame
+
+        UIStrokeFAQ.Parent = faqFrame
+        UIStrokeFAQ.Thickness = 2
+        UIStrokeFAQ.Color = Color3.fromRGB(255, 255, 255)
+        UIStrokeFAQ.Transparency = 0.5
+
+        faqText.Size = UDim2.new(1, 0, 0.8, 0)
+        faqText.Position = UDim2.new(0, 0, 0, 0)
+        faqText.Text = "Frequently Asked Questions\n\nQ: How do I get a key?\nA: Join our Discord to get a key.\n\nQ: What if my key is not working?\nA: Make sure you entered the key correctly and try again."
+        faqText.TextColor3 = Color3.fromRGB(255, 255, 255)
+        faqText.BackgroundTransparency = 1
+        faqText.Font = Enum.Font.Gotham
+        faqText.TextSize = 18
+        faqText.TextWrapped = true
+        faqText.Parent = faqFrame
+
+        faqCloseButton.Size = UDim2.new(0.8, 0, 0.15, 0)
+        faqCloseButton.Position = UDim2.new(0.1, 0, 0.75, 0)
+        faqCloseButton.Text = "Close"
+        faqCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        faqCloseButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        faqCloseButton.BackgroundTransparency = 0.1
+        faqCloseButton.BorderSizePixel = 0
+        faqCloseButton.Font = Enum.Font.GothamBold
+        faqCloseButton.TextSize = 18
+        faqCloseButton.Parent = faqFrame
+
+        UICornerFAQCloseButton.CornerRadius = UDim.new(0, 10)
+        UICornerFAQCloseButton.Parent = faqCloseButton
+
+        faqCloseButton.MouseButton1Click:Connect(function()
+            local tweenOut = game:GetService("TweenService"):Create(faqFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.3, 0, 1, 0)})
+            tweenOut:Play()
+            tweenOut.Completed:Connect(function()
+                faqGUI:Destroy()
+            end)
+        end)
+
+        -- Animasi munculnya GUI FAQ dengan efek bounce yang lebih smooth
+        faqFrame.Position = UDim2.new(0.3, 0, 1, 0)
+        local tweenIn = game:GetService("TweenService"):Create(faqFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.3, 0, 0.3, 0)})
+        tweenIn:Play()
+    end)
+
+    -- Animasi GUI muncul dengan efek bounce yang lebih smooth
+    keyFrame.Position = UDim2.new(0.35, 0, 1, 0)
+    local tweenIn = game:GetService("TweenService"):Create(keyFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.35, 0, 0.25, 0)})
+    tweenIn:Play()
+
+    return keyGUI
+end
+
+-- Fungsi untuk memverifikasi kunci yang dimasukkan
+local function verifyKey(inputKey)
+    local validKeys = {
+        "cch", "CCH", "Kontoru",
+        "CanCantHUB==nPuipj6eFXLrOWQVdtHsUpQxWHzvdXKSZNYAl68UM5weSsp85ge6lz9HN7UO0hHy",
+        "CanCantHUB==2X4cfh/H3o9+l89ypv/is4G0wf5kmaGNrP4SjixyBlYrxXeoxmIeIqpAbe6CkvTr",
+        "CanCantHUB==uZ6GyuQwp1IOkp35XzUK1dNTOM7ZvybWQR4yNInRXd+FuNVocN+xa3QasAzMu0sE",
+        "CanCantHUB==C2kAxNJPvwdzb8vocujAIXg21bPKBEGQLnPrey8BsmyasV1FVfFpRxQDgWaRdNzR",
+        "CanCantHUB==2qmLPk2t+N0IyS/xaoXt8Q58Xtw8+vfh1VVvpRj5xIf5atk6/a48oi8jknb0z9IA",
+        "CanCantHUB==UVdgkzK3e4dcaM7zyYyQaccJqgM3fYIsqQ3ecqhm3qFoNIo5joVLZGJJCdo/cZig",
+        "CanCantHUB==J5I4NE2VACviQF4Mt6ldNhEMev7WHc/jPjvEoCG2bi/uAXiinhz+xGBFBMLFyols",
+        "CanCantHUB==CeufDB0tkorpwpGYvXycszulTI2XwiBM7A9vnty87Vc2nldQqO1j37doKIAZv8pR",
+        "CanCantHUB==Vzsv2y3+l5DuPYYXGaVS4KDoRquQCBsMfvopb5KILTlO/D0IM8TU74u9ZJwFqRt1",
+        "CanCantHUB==oAETT+SWfTSE3X5s/jOh7jkH7IsKDMngVWa3jhPiJfEt1OpG1EZp0DylCetDNwgS",
+        "CanCantHUB==3kGJ8UF/LDcV2NIu7ISHND5GSe0oFM78hgkupW3exeqhIyW6Ujuq7WoFaENLbj9M",
+        "CanCantHUB==lxqtjqt7W4zAvGuVsQQQsmE0Rnlq1sN/FxDLbI3Usc4Niye5zd+QMiyc4arxUjAh",
+        "CanCantHUB==M1bv6xZm+nWHkIY6uSpWywyyPuWWZob6rqlyQh/hoeH5kwRoS0I8u+/Xcx7VxDPc",
+        "CanCantHUB==/L21B83prf3lM8Ocslz0ocMgYPN6H81wM7XXzbC8T7OLwGjBPt/F0pHE3eTNyAZS",
+        "CanCantHUB==N4TIo8d1AnUdQc4FLHRv4+Uw6fzIqDHqtE7fqvCT918ezm6fb2Ss6ItKRQv89G/l",
+        "CanCantHUB==sZIp3H3omJuIWaQzga7DTil7QkLBPtSf8PPBkH1RLnSbO/9fKLYrcCqduPgTx4qy",
+        "CanCantHUB==s6fJMksRmV7pkxPd74fVX/iLZqFCEdC68GDLPcYWvVfTw51SgIqBov4G/bPlZi6V",
+        "CanCantHUB==Mj5CMPFAb3ptN0qiaypOa3qdBubfa/NUbipVpmoxWuKk3S1peSXVo2uGbvCW+Mr4",
+        "CanCantHUB==cCFFu7mT5g2A+SMM1mOkfOab5sRGzjchaIEcCSWX0x/DFgg9h7ScHYbtthndoafe",
+        "CanCantHUB==dx9NM+qjWlKvAsdCQWzTXM6F82Nfm33pNZ2DNo98PVhrwbWTaHUyfU+lzgOtDaup",
+        "CanCantHUB==DujkaVSAJA3a/AYn1Ck3Tv4tNdk47TergtZWVvmNgLwWxrq3GZ7B0qe8r7euqhSq",
+        "CanCantHUB==uWFN0OTyi/QHXndNxPryTuDXyx962h5r4IzSNkJ5TkpEhXnzvcyXODJECh4GDHtJ",
+        "CanCantHUB==5bgScMXp0ftv04a6vSqi5tiSh72QlQ251p++54VfpyNPgK5reIr9QmhfHwRP2XfN",
+        "CanCantHUB==qAWwtxIODIIETOyM/cIWA81daNmqUo1w/40Sw65CeIduJiOpeqaw/dRk6Y7lnCzm",
+        "CanCantHUB==HGEk9LCwFaLb78VSG6S3btQeF9CsgymAYjtNOHdQmZbMbDmv20TRzn1mqpD9+9US",
+        "CanCantHUB==unJIyp5XIc4rKKIE3Rh1tCa53WVpmQdjGN7KMJ+Y6gULScyX/VnoXzY7sqUi0Ht7",
+        "CanCantHUB==aYGKD4VLzS3JPKhYoCDMkNtk22AiJznValGKZRbq7jRxxpwRbKCyKhHV9nCDcxNe",
+        "CanCantHUB==i7ovWl6+QEiqdkvd0GThl5uQSlGne4tnXz4lFqwWChoOMa1kBlF0foPKfgbWFfoG",
+        "CanCantHUB==TOTqYeupwA8uysUi6B1YOLAMSw9iO0tKxlRRtJkcINHKt7remvoRiMMe3mzCcFFU",
+        "CanCantHUB==PDKMPYU1A29j75DXKIeJjMVZN7NIRfweC6UIIsZL5xudx1pQf/oi5aAjsh8hpETu",
+        "CanCantHUB==yh5kVDMVAvd8d74dQ2nrsu3nLoHlNtFl/0eib3BaJYZLR3FNwMmkwav49t/ESSI5",
+        "CanCantHUB==w35ZiaohXm3Ltr8Jxw3uH4AfcNaaAVNXafEktuNlOCqa+JmegY5BHDeyuOd4PsJ0",
+        "CanCantHUB==M7UA+IuFz56sRkTNj1hodWlrCg9oW38sHmbekXqTDyz0zW3YVG1HYqALtJvZF7Gn",
+        "CanCantHUB==dW3LYYjgWLsiXE0CW/6ltWsdJlXY3/vg/7pTohLPHwDas5RG0jG5KTifrbQNBMxU",
+        "CanCantHUB==bOMRWHK5A9In/KyuGR0O59rc3kFi61CzUHbSeALH/1oqj8vQrDgDAsvej43SGS+u",
+        "CanCantHUB==2BbmB4supNKAu8fU4xRXasBlPildMhrugvgpCNof76BxcuCQswmbXSc7EREAi+bS",
+        "CanCantHUB==yCbn1loO9t/HLLeFbbic9H5aZUMav/PMpuwkw1FT+0/71ZdazHUUxU7fDbIPwJo6",
+        "CanCantHUB==PyrJK8mDyCRFRXN8lM0vWfV8Kztn/bdyyX7Pr7Uf6vFgqQKWK5zi69pqU7CXQn37",
+        "CanCantHUB==GzOgJHVa8NinL0Y/mGrryjAcIJcqdakBNtAFVcVZFPaFZLiNb8Mh+qqm5trtybna",
+        "CanCantHUB==zgNPZk9mp3413OWtK9TxNecphtwDyMfCrnZ2RLmzvDSRF3tFkJtHS35Gci3y9DVD",
+        "CanCantHUB==1Xphq30Bc8wqfpOZw7bKVMgIvqD8GvhxY1gVyb8/uonLT8B1/tD4t9roc5TuBYpk",
+        "CanCantHUB==4JIiRT9acyvP6lOSASq0pmsRS7kPlPEOTcfWfnI7Uk8Bew/nWS+a9UD1pGHx5mW+",
+        "CanCantHUB==jon/ZG2CPEP875ee6SD5nUuxRp84c1ciIVJQkwX9I5ru58v4KMRMz0V7pM89aizo",
+        "CanCantHUB==UmjZ35T/Of8lGnNHWka9HQmc0tcJHAvXEgO+fUf1ST8AgaGxCIVQ4nJcaN/L0riX",
+        "CanCantHUB==CI2VP7TO4IRCD99mi017/1+66VTSmaazuE6uHpg6ayb4tF8Kc5tmI7L0AKS+qPNf",
+        "CanCantHUB==aDVAdpmW4U6Ya0V9wYDWHDIarLhKbJL+axPrY3yBEmC0VnpYj1MvwQBxWIBCGdWp",
+        "CanCantHUB==cOh2mdzfU23uKutnmP5aPMLBsObsBEN+8Ev0No4GTyNLMLK6gKPy48gvbrAmlMsm",
+        "CanCantHUB==lYcor/NNqzNHqmuhYrp5C51HKZDQDJPtBb8boI/AZMwnVXGNll5LfAkiAabT3JgN",
+        "CanCantHUB==9yleuWPCRlayCxP96OmWFFg21yxE2Bzv0+8as8D5quVgd7ZDt5LBRRMOZ80hRLMx",
+        "CanCantHUB==TUFphgBPZHDi9deRn/hlFmsmX/lZN57xDuMloCtTvkpuNy2u/AzVg47ZNog88TSX"
+    } -- Gantilah dengan kunci yang valid
+
+    for _, key in ipairs(validKeys) do
+        if inputKey == key then
+            return true
+        end
+    end
+    return false
+end
+
+-- Fungsi utama untuk menjalankan script
+local function main()
+    if not kickPlayerIfUnsupportedGame() then
+        return
+    end
+
+    local isGameSupported = isSupportedGame()
+
+    if isGameSupported then
+        local gameInfo = getGameInfo()
+        if not gameInfo or not gameInfo.guiName or not gameInfo.tabs or not gameInfo.functions then
+            game:GetService("Players").LocalPlayer:Kick("Error loading game info. Please check your configuration.")
+        else
+            -- Hentikan animasi checking games
+            stopCheckingAnimation()
+            loadingText.Text = "Games Found | " .. gameInfo.guiName
+            wait(2) -- Tampilkan pesan selama 2 detik
+
+            -- Hapus GUI loading dengan animasi
+            local tweenOut = game:GetService("TweenService"):Create(loadingFrame, TweenInfo.new(1, Enum.EasingStyle.Bounce, Enum.EasingDirection.Out), {Position = UDim2.new(0.35, 0, 1, 0)})
+            tweenOut:Play()
+            tweenOut.Completed:Connect(function()
+                loadingGUI:Destroy()
+                createKeyInputGUI(function(inputKey)
+                    if verifyKey(inputKey) then
+                        return true
+                    else
+                        return false
+                    end
+                end)
+            end)
+        end
+    end
+end
+
+-- Panggil fungsi utama
+main()
