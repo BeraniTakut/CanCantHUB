@@ -1,4 +1,4 @@
-# Admin Checker
+# ADMIN CHECKER
 
 # PLAYER
   - WalkSpeed
