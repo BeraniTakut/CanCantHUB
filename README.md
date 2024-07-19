@@ -7,7 +7,6 @@
     - [x] Windows
     - [ ] Mobile - very buggy
   - [x] Duel Only
-- [x] [FPS] Gun Grounds FFA (TESTING)
 - **More Coming Soon...**
 
 ### Features
