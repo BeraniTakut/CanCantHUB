@@ -1,9 +1,6 @@
 # CanCantHUB (TESTING)
 ## DISCLAIMER: For fun, and sorry if it harms you.
 
-## AIO (All In One)
-~~`loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/games/AIO"))()`~~
-
 ### Games
 - [x] Unnamed Shooter (TESTING)
   - [x] Normal
