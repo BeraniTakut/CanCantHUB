@@ -1,38 +1,48 @@
-# ADMIN CHECKER
+FEATURES CANCANTHUB UNNAMED SHOOTER
 
-# PLAYER
+ADMIN CHECKER
+PLAYER
   - WalkSpeed
   - JumpPower
-  - Auto Pickup Medkit
-    - Always Pickup Medkit
   - Hitbox
-    - Hitbox Size
+   - Hitbox Size
+  - Auto Pickup Medkit
   - No-Clip
   - Fly
-  - **More Coming Soon...**
-# ESP
+  - More Coming Soon...
+
+ESP
   - ESP
     - ESP Method
       - Highlight -> Recommend
-      - Drawing Box
+      - DrawLine
+      - Chams
+    - Name Position
+      - Head
+      - Torso
+      - Feet
     - ESP Distance
     - Show Teammates
     - Show Player Names
     - Show health Indicator
     - Show Distance Indicator
+    - Change Indicator Color
     - Name Text Size
     - Health Text Size
     - Distance Text Size
-    - Change Indicator Color
-    - **More Coming Soon...**
-# AIMBOT
+  - More Coming Soon...
+
+AIMBOT
 - Aimbot
   - Target Priority
-  - Interpolation Speed
+    - All Possible Body Part Character
   - Wall Check
-  - Circle Radius
+  - Interpolation Speed -> Changes to 0.3 for better experience (For me)
   - Lock Distance
-  - **More Coming Soon...**
-# MISC
-- Stats -> ASS
-- **More Coming Soon...**
+  - Circle Radius
+  - More Coming Soon...
+
+ MISC
+- Show Stats
+- Rejoin
+- More Coming Soon...
