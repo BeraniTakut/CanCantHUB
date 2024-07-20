@@ -1,0 +1,44 @@
+-- Script info
+local scriptVersion = "v1.1"
+local scriptName = "CanCantHUB"
+
+local function printAdvancedInfo()
+    print("=====================================")
+    print("            CanCantHUB               ")
+    print("=====================================")
+    print("Script Version: " .. scriptVersion)
+    print("Script Name: " .. scriptName)
+    print("Player Name: " .. game.Players.LocalPlayer.Name)
+    print("=====================================")
+end
+
+local function notifyDiscordJoin()
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "CanCantHUB",
+        Text = "Join my Discord for get lastest updates!",
+        Duration = 5,
+        Button1 = "Copy link | Join",
+        Callback = function()
+            setclipboard("https://discord.gg/krCfSCyGDF")
+        end
+    })
+end
+
+local function printScriptLoaded()
+    print("=====================================")
+    print("       Script successfully loaded!    ")
+    print("=====================================")
+end
+
+local function executeScript()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/games/UnnamedShooter"))()
+end
+
+local function main()
+    printAdvancedInfo()
+    notifyDiscordJoin()
+    executeScript()
+    printScriptLoaded()
+end
+
+main()
