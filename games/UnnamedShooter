@@ -1,8 +1,7 @@
 -- Script info
-local scriptVersion = "1.0.0"
+local scriptVersion = "v1.1"
 local scriptName = "CanCantHUB"
 
--- Function to print advanced information to the console
 local function printAdvancedInfo()
     print("=====================================")
     print("            CanCantHUB               ")
@@ -13,21 +12,18 @@ local function printAdvancedInfo()
     print("=====================================")
 end
 
--- Notifikasi Join Discord
 local function notifyDiscordJoin()
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
-        Text = "Join our Discord for more updates!",
+        Text = "Join my Discord for more updates!",
         Duration = 5,
         Button1 = "Join",
         Callback = function()
-            -- Replace with your Discord invite link
-            setclipboard("https://discord.gg/YourDiscordInvite")
+            setclipboard("https://discord.gg/krCfSCyGDF")
         end
     })
 end
 
--- Print Sukses Load Script to Console
 local function printScriptLoaded()
     print("=====================================")
     print("       Script successfully loaded!    ")
@@ -39,7 +35,6 @@ local function executeScript()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/usloader"))()
 end
 
--- Main function to handle all functionalities
 local function main()
     printAdvancedInfo()
     notifyDiscordJoin()
@@ -47,5 +42,4 @@ local function main()
     printScriptLoaded()
 end
 
--- Run the main function
 main()
