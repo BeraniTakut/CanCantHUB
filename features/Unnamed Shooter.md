@@ -15,8 +15,8 @@ ESP
   - ESP
     - ESP Method
       - Highlight -> Recommend
-      - DrawLine
-      - Chams
+      - DrawLine -> Buggy
+      - Chams -> Recommend
     - Name Position
       - Head
       - Torso
