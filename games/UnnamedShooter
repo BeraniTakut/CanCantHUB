@@ -2,28 +2,33 @@
 local scriptVersion = "v1.1"
 local scriptName = "CanCantHUB"
 
+-- Function to print advanced information to the console
 local function printAdvancedInfo()
     print("=====================================")
     print("            CanCantHUB               ")
     print("=====================================")
-    print("Script Version: " .. scriptVersion)
-    print("Script Name: " .. scriptName)
-    print("Player Name: " .. game.Players.LocalPlayer.Name)
+    print("Script Version  : " .. scriptVersion)
+    print("Script Name     : " .. scriptName)
+    print("Player Name     : " .. game.Players.LocalPlayer.Name)
+    print("Execution Time  : " .. os.date("%Y-%m-%d %H:%M:%S"))
     print("=====================================")
 end
 
+-- Notifikasi Join Discord
 local function notifyDiscordJoin()
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
-        Text = "Join my Discord for more updates!",
+        Text = "Join our Discord for more updates!",
         Duration = 5,
         Button1 = "Join",
         Callback = function()
+            -- Replace with your Discord invite link
             setclipboard("https://discord.gg/krCfSCyGDF")
         end
     })
 end
 
+-- Print Sukses Load Script to Console
 local function printScriptLoaded()
     print("=====================================")
     print("       Script successfully loaded!    ")
@@ -32,14 +37,26 @@ end
 
 -- Execute the script
 local function executeScript()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/usloader"))()
+    local success, errorMsg = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/games/UnnamedShooter"))()
+    end)
+
+    if success then
+        printScriptLoaded()
+    else
+        print("=====================================")
+        print("       Failed to load script!         ")
+        print("Error: " .. errorMsg)
+        print("=====================================")
+    end
 end
 
+-- Main function to handle all functionalities
 local function main()
     printAdvancedInfo()
     notifyDiscordJoin()
     executeScript()
-    printScriptLoaded()
 end
 
+-- Run the main function
 main()
