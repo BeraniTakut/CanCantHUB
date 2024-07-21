@@ -17,23 +17,30 @@ end
 local function notifyDiscordJoin()
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
-        Text = "Join our Discord for more updates!",
+        Text = "Join my Discord Server to get the latest updates!",
         Duration = 5,
         Button1 = "Join",
-        Callback = function()
-            -- Replace with your Discord invite link
-            setclipboard("https://discord.gg/krCfSCyGDF")
+        Button2 = "No :)",
+        Callback = function(buttonClicked)
+            if buttonClicked == "Join" then
+                setclipboard("https://discord.gg/krCfSCyGDF")
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "CanCantHUB",
+                    Text = "Discord invite link copied to clipboard!",
+                    Duration = 5
+                })
+            end
         end
     })
 end
 
+-- Print Sukses Load Script to Console
 local function printScriptLoaded()
     print("=====================================")
     print("       Script successfully loaded!    ")
     print("=====================================")
 end
 
--- Execute the script
 local function executeScript()
     local success, errorMsg = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/usloader"))()
@@ -55,5 +62,4 @@ local function main()
     executeScript()
 end
 
--- Run the main function
 main()
