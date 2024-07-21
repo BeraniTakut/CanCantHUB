@@ -14,7 +14,6 @@ local function printAdvancedInfo()
     print("=====================================")
 end
 
--- Notifikasi Join Discord
 local function notifyDiscordJoin()
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
@@ -23,12 +22,11 @@ local function notifyDiscordJoin()
         Button1 = "Join",
         Callback = function()
             -- Replace with your Discord invite link
-            setclipboard("https://discord.gg/krCfSCyGDF")
+            setclipboard("https://discord.gg/YourDiscordInvite")
         end
     })
 end
 
--- Print Sukses Load Script to Console
 local function printScriptLoaded()
     print("=====================================")
     print("       Script successfully loaded!    ")
@@ -38,7 +36,7 @@ end
 -- Execute the script
 local function executeScript()
     local success, errorMsg = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/games/UnnamedShooter"))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/usloader"))()
     end)
 
     if success then
@@ -51,7 +49,6 @@ local function executeScript()
     end
 end
 
--- Main function to handle all functionalities
 local function main()
     printAdvancedInfo()
     notifyDiscordJoin()
