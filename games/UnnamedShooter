@@ -22,7 +22,7 @@ local function notifyDiscordJoin()
         Button1 = "Join",
         Callback = function()
             -- Replace with your Discord invite link
-            setclipboard("https://discord.gg/YourDiscordInvite")
+            setclipboard("https://discord.gg/krCfSCyGDF")
         end
     })
 end
