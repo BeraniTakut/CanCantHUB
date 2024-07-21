@@ -2,7 +2,6 @@
 local scriptVersion = "v1.1"
 local scriptName = "CanCantHUB"
 
--- Function to print advanced information to the console
 local function printAdvancedInfo()
     print("=====================================")
     print("            CanCantHUB               ")
@@ -15,26 +14,28 @@ local function printAdvancedInfo()
 end
 
 local function notifyDiscordJoin()
+    local joinCallback = Instance.new("BindableFunction")
+    joinCallback.OnInvoke = function(buttonClicked)
+        if buttonClicked == "Join" then
+            setclipboard("https://discord.gg/krCfSCyGDF")
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "CanCantHUB",
+                Text = "Discord invite link copied to clipboard!",
+                Duration = 5
+            })
+        end
+    end
+
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
         Text = "Join my Discord Server to get the latest updates!",
         Duration = 5,
         Button1 = "Join",
-        Button2 = "No :)",
-        Callback = function(buttonClicked)
-            if buttonClicked == "Join" then
-                setclipboard("https://discord.gg/krCfSCyGDF")
-                game.StarterGui:SetCore("SendNotification", {
-                    Title = "CanCantHUB",
-                    Text = "Discord invite link copied to clipboard!",
-                    Duration = 5
-                })
-            end
-        end
+        Button2 = "No ;)",
+        Callback = joinCallback
     })
 end
 
--- Print Sukses Load Script to Console
 local function printScriptLoaded()
     print("=====================================")
     print("       Script successfully loaded!    ")
@@ -62,4 +63,5 @@ local function main()
     executeScript()
 end
 
+-- Run the main function
 main()
