@@ -1,8 +1,6 @@
--- Script info
 local scriptVersion = "1.1"
 local scriptName = "Unnamed Shooter | CanCantHUB"
 
--- Function to print advanced information to the console
 local function printAdvancedInfo()
     print("=====================================")
     print("            CanCantHUB               ")
@@ -14,38 +12,48 @@ local function printAdvancedInfo()
     print("=====================================")
 end
 
--- Notifikasi Join Discord
 local function notifyDiscordJoin()
     local joinCallback = Instance.new("BindableFunction")
     joinCallback.OnInvoke = function(buttonClicked)
         if buttonClicked == "Join" then
-            game:GetService("GuiService"):OpenBrowserWindow("https://discord.gg/krCfSCyGDF")
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "CanCantHUB",
-                Text = "Discord invite link opened in browser!",
-                Duration = 5
-            })
+            local discordInviteURL = "discord://invite/krCfSCyGDF"
+            if syn and syn.request then
+                syn.request({
+                    Url = discordInviteURL,
+                    Method = "GET"
+                })
+            elseif request then
+                request({
+                    Url = discordInviteURL,
+                    Method = "GET"
+                })
+            else
+                setclipboard("https://discord.gg/krCfSCyGDF")
+                game.StarterGui:SetCore("SendNotification", {
+                    Title = "CanCantHUB",
+                    Text = "Discord invite link copied to clipboard!",
+                    Duration = 5
+                })
+            end
         end
     end
 
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
-        Text = "Join my Discord for more updates!",
+        Text = "Join my discord to get the latest updates!",
         Duration = 5,
         Button1 = "Join",
-        Button2 = "No ;)",
+        Button2 = "Close ;)",
         Callback = joinCallback
     })
 end
 
--- Print Sukses Load Script to Console
 local function printScriptLoaded()
     print("=====================================")
     print("       Script successfully loaded!    ")
     print("=====================================")
 end
 
--- Execute the script
 local function executeScript()
     local success, errorMsg = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/usloader"))()
@@ -61,12 +69,10 @@ local function executeScript()
     end
 end
 
--- Main function to handle all functionalities
 local function main()
     printAdvancedInfo()
     notifyDiscordJoin()
     executeScript()
 end
 
--- Run the main function
 main()
