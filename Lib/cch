@@ -7,7 +7,14 @@ function UILibrary:CreateFrame(parent, name, position, size, color)
     frame.Position = UDim2.new(position.X.Scale, position.X.Offset, position.Y.Scale, position.Y.Offset)
     frame.Size = UDim2.new(size.X.Scale, size.X.Offset, size.Y.Scale, size.Y.Offset)
     frame.BackgroundColor3 = color
+    frame.BorderSizePixel = 0
     frame.Parent = parent
+
+    -- Adding smooth corner effect
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 10)
+    uiCorner.Parent = frame
+
     return frame
 end
 
@@ -19,8 +26,17 @@ function UILibrary:CreateButton(parent, name, position, size, color, text, onCli
     button.Size = UDim2.new(size.X.Scale, size.X.Offset, size.Y.Scale, size.Y.Offset)
     button.BackgroundColor3 = color
     button.Text = text
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 14
     button.Parent = parent
     button.MouseButton1Click:Connect(onClick)
+    
+    -- Adding smooth corner effect
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 10)
+    uiCorner.Parent = button
+
     return button
 end
 
@@ -32,7 +48,16 @@ function UILibrary:CreateLabel(parent, name, position, size, color, text)
     label.Size = UDim2.new(size.X.Scale, size.X.Offset, size.Y.Scale, size.Y.Offset)
     label.BackgroundColor3 = color
     label.Text = text
+    label.TextColor3 = Color3.new(1, 1, 1)
+    label.Font = Enum.Font.SourceSans
+    label.TextSize = 14
     label.Parent = parent
+    
+    -- Adding smooth corner effect
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 10)
+    uiCorner.Parent = label
+
     return label
 end
 
@@ -44,12 +69,21 @@ function UILibrary:CreateTextBox(parent, name, position, size, color, placeholde
     textBox.Size = UDim2.new(size.X.Scale, size.X.Offset, size.Y.Scale, size.Y.Offset)
     textBox.BackgroundColor3 = color
     textBox.PlaceholderText = placeholderText
+    textBox.TextColor3 = Color3.new(1, 1, 1)
+    textBox.Font = Enum.Font.SourceSans
+    textBox.TextSize = 14
     textBox.Parent = parent
     textBox.Changed:Connect(function(property)
         if property == "Text" then
             onTextChanged(textBox.Text)
         end
     end)
+    
+    -- Adding smooth corner effect
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 10)
+    uiCorner.Parent = textBox
+
     return textBox
 end
 
@@ -98,6 +132,11 @@ function UILibrary:CreateSlider(parent, name, position, size, color, min, max, o
             updateSlider(input)
         end
     end)
+    
+    -- Adding smooth corner effect
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 10)
+    uiCorner.Parent = sliderFrame
 
     return sliderFrame
 end
@@ -122,9 +161,14 @@ function UILibrary:CreateCheckBox(parent, name, position, size, color, onCheckCh
 
     checkBox.MouseButton1Click:Connect(function()
         isChecked = not isChecked
-        checkBox.BackgroundColor3 = isChecked and Color3.new(0, 1, 0) or Color3.new(1, 1, 1)
+        checkBox.BackgroundColor3 = isChecked and Color3.new(0.5, 0, 0.5) or Color3.new(1, 1, 1)
         onCheckChanged(isChecked)
     end)
+    
+    -- Adding smooth corner effect
+    local uiCorner = Instance.new("UICorner")
+    uiCorner.CornerRadius = UDim.new(0, 10)
+    uiCorner.Parent = checkBoxFrame
 
     return checkBoxFrame
 end
