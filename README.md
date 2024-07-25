@@ -19,5 +19,4 @@
 ### Tested Executors
 - [x] Wave
 - [x] Solara
-- [x] Arceus X 
-- [ ] Celery - Not work with loadstring 
+- [x] Celery
