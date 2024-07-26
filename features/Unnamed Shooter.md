@@ -1,7 +1,7 @@
-FEATURES CANCANTHUB UNNAMED SHOOTER
+# FEATURES CANCANTHUB UNNAMED SHOOTER
 
-ADMIN CHECKER
-PLAYER
+### ADMIN CHECKER
+### PLAYER
   - WalkSpeed
   - JumpPower
   - Hitbox
@@ -12,7 +12,7 @@ PLAYER
   - Fly
   - More Coming Soon...
 
-ESP
+### ESP
   - ESP
     - ESP Method
       - Highlight -> Recommend
@@ -33,7 +33,7 @@ ESP
     - Distance Text Size
   - More Coming Soon...
 
-AIMBOT
+### AIMBOT
 - Aimbot
   - Target Priority
     - All Possible Body Part Character
@@ -43,7 +43,8 @@ AIMBOT
   - Circle Radius
   - More Coming Soon...
 
- MISC
+### MISC
 - Show Stats
+- All object half tranparent
 - Rejoin
 - More Coming Soon...
