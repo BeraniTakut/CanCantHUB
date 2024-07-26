@@ -7,6 +7,7 @@ PLAYER
   - Hitbox
    - Hitbox Size
   - Auto Pickup Medkit
+  - Auto Tp (at your own risk)
   - No-Clip
   - Fly
   - More Coming Soon...
