@@ -28,7 +28,7 @@ local function notifyDiscordJoin()
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
         Text = "Join my discord to get the latest updates!",
-        Duration = 5,
+        Duration = 60,
         Button1 = "Join",
         Button2 = "No ;)",
         Callback = joinCallback
