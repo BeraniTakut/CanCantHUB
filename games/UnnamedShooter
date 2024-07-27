@@ -1,4 +1,4 @@
-local scriptVersion = "Outaded"
+local scriptVersion = "Outdated"
 local scriptName = "Unnamed Shooter | CanCantHUB"
 
 local function printAdvancedInfo()
@@ -27,7 +27,7 @@ local function notifyDiscordJoin()
 
     game.StarterGui:SetCore("SendNotification", {
         Title = "CanCantHUB",
-        Text = "This script is outaded please join my discord to get the latest updates!",
+        Text = "This script is outdated please join my discord to get the latest updates!",
         Duration = 3600,
         Button1 = "Join",
         Button2 = "No ;)",
@@ -37,13 +37,13 @@ end
 
 local function printScriptLoaded()
     print("=====================================")
-    print("       Script successfully loaded!    ")
+    print("       Script Outdated!    ")
     print("=====================================")
 end
 
 local function executeScript()
     local success, errorMsg = pcall(function()
-        print("Script Outaded")
+        print("Script Outdated")
     end)
 
     if success then
