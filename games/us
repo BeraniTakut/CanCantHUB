@@ -1,5 +1,5 @@
 local scriptVersion = "v1.1"
-local scriptName = "Unnamed Shooter | CanCantHUB"
+local scriptName = "Unnamed Shooter"
 
 local function printAdvancedInfo()
     print("=====================================")
