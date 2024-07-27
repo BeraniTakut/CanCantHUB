@@ -3,7 +3,7 @@ local scriptName = "Unnamed Shooter"
 
 local function printAdvancedInfo()
     print("=====================================")
-    print("            CanCantHUB               ")
+    print("             CanCantHUB              ")
     print("=====================================")
     print("Script Version  : " .. scriptVersion)
     print("Script Name     : " .. scriptName)
@@ -37,7 +37,7 @@ end
 
 local function printScriptLoaded()
     print("=====================================")
-    print("       Script Outdated!    ")
+    print("           Script Outdated!          ")
     print("=====================================")
 end
 
