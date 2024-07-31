@@ -7,6 +7,7 @@
     - [x] Windows
     - [ ] Mobile - very buggy
   - [x] Duel Only
+- [x] Murder Mystery 2
 - **More Coming Soon...**
 
 ### Features
