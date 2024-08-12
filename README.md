@@ -7,7 +7,7 @@
     - [x] Windows
     - [ ] Mobile - very buggy
   - [x] Duel Only
-- [x] Murder Mystery 2
+- [x] Anime Card Battle
 - **More Coming Soon...**
 
 ### Features
