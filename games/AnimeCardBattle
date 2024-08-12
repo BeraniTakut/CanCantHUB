@@ -43,7 +43,7 @@ end
 
 local function executeScript()
     local success, errorMsg = pcall(function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/mm2loader"))()
+        loadstring(game:HttpGet(""))()
     end)
 
     if success then
