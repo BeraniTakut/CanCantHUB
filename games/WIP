@@ -1,5 +1,5 @@
 local scriptVersion = "v1.0"
-local scriptName = "MM2 Auto Farm"
+local scriptName = "WIP"
 
 local function printAdvancedInfo()
     print("=====================================")
