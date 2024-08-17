@@ -7,7 +7,6 @@
     - [x] Windows
     - [ ] Mobile - very buggy
   - [x] Duel Only
-- [x] Anime Card Battle
 - **More Coming Soon...**
 
 ### Features
