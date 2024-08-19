@@ -16,7 +16,7 @@ local function notifyDiscordJoin()
     local joinCallback = Instance.new("BindableFunction")
     joinCallback.OnInvoke = function(buttonClicked)
         if buttonClicked == "Join" then
-            setclipboard("https://discord.gg/krCfSCyGDF")
+            setclipboard("https://discord.gg/M7mEr9tcWS")
             game.StarterGui:SetCore("SendNotification", {
                 Title = "CanCantHUB",
                 Text = "Discord invite link copied to clipboard!",
