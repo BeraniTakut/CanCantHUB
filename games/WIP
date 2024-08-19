@@ -1,5 +1,5 @@
 local scriptVersion = "v1.0"
-local scriptName = "WIP"
+local scriptName = "Anime Card Battle"
 
 local function printAdvancedInfo()
     print("=====================================")
@@ -16,7 +16,7 @@ local function notifyDiscordJoin()
     local joinCallback = Instance.new("BindableFunction")
     joinCallback.OnInvoke = function(buttonClicked)
         if buttonClicked == "Join" then
-            setclipboard("https://discord.gg/cmubh8zK62")
+            setclipboard("https://discord.gg/M7mEr9tcWS")
             game.StarterGui:SetCore("SendNotification", {
                 Title = "CanCantHUB",
                 Text = "Discord invite link copied to clipboard!",
@@ -43,7 +43,7 @@ end
 
 local function executeScript()
     local success, errorMsg = pcall(function()
-        loadstring(game:HttpGet(""))()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/acbloader"))()
     end)
 
     if success then
