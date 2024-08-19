@@ -1,7 +1,7 @@
 # FEATURES CANCANTHUB UNNAMED SHOOTER
 
-### ADMIN CHECKER
-### PLAYER
+### ADMIN CHECKER [✔️]
+### PLAYER [✔️]
   - WalkSpeed
   - JumpPower
   - Hitbox
@@ -10,9 +10,8 @@
   - Auto Tp (at your own risk)
   - No-Clip
   - Fly
-  - More Coming Soon...
 
-### ESP
+### ESP [✔️]
   - ESP
     - ESP Method
       - Highlight -> Recommend
@@ -31,9 +30,8 @@
     - Name Text Size
     - Health Text Size
     - Distance Text Size
-  - More Coming Soon...
 
-### AIMBOT
+### AIMBOT [✔️]
 - Aimbot
   - Target Priority
     - All Possible Body Part Character
@@ -41,10 +39,11 @@
   - Interpolation Speed -> Changes to 0.3 for better experience (For me)
   - Lock Distance
   - Circle Radius
-  - More Coming Soon...
 
-### MISC
+### MISC [✔️]
 - Show Stats
 - All object half tranparent
+- Hide UI
+- Select To Copy Player ID
+- Tp to Cordinates
 - Rejoin
-- More Coming Soon...
