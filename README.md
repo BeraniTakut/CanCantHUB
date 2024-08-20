@@ -8,6 +8,7 @@
     - [ ] Mobile - very buggy
   - [x] Duel Only
 - [x] Anime Card Battle
+- [x] Fat Race
 - **More Coming Soon...**
 
 ### Features
