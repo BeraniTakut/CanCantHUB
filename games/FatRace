@@ -1,0 +1,65 @@
+local scriptVersion = "v1.0"
+local scriptName = "Fat Race"
+
+local function printAdvancedInfo()
+    print("=====================================")
+    print("             CanCantHUB              ")
+    print("=====================================")
+    print("Script Version  : " .. scriptVersion)
+    print("Script Name     : " .. scriptName)
+    print("Player Name     : " .. game.Players.LocalPlayer.Name)
+    print("Execution Time  : " .. os.date("%Y-%m-%d %H:%M:%S"))
+    print("=====================================")
+end
+
+local function notifyDiscordJoin()
+    local joinCallback = Instance.new("BindableFunction")
+    joinCallback.OnInvoke = function(buttonClicked)
+        if buttonClicked == "Join" then
+            setclipboard("https://discord.gg/M7mEr9tcWS")
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "CanCantHUB",
+                Text = "Discord invite link copied to clipboard!",
+                Duration = 5
+            })
+        end
+    end
+
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "CanCantHUB",
+        Text = "Join my discord to get the latest updates!",
+        Duration = 60,
+        Button1 = "Join",
+        Button2 = "No ;)",
+        Callback = joinCallback
+    })
+end
+
+local function printScriptLoaded()
+    print("=====================================")
+    print("     Script successfully loaded!     ")
+    print("=====================================")
+end
+
+local function executeScript()
+    local success, errorMsg = pcall(function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/BeraniTakut/CanCantHUB/main/Lib/frloader"))()
+    end)
+
+    if success then
+        printScriptLoaded()
+    else
+        print("=====================================")
+        print("       Failed to load script!         ")
+        print("Error: " .. errorMsg)
+        print("=====================================")
+    end
+end
+
+local function main()
+    printAdvancedInfo()
+    notifyDiscordJoin()
+    executeScript()
+end
+
+main()
