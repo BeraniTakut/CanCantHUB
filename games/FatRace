@@ -1,4 +1,4 @@
-local scriptVersion = "v1.0"
+local scriptVersion = "v1.1"
 local scriptName = "Fat Race"
 
 local function printAdvancedInfo()
