@@ -9,8 +9,6 @@
 - Auto Buy Gloves
 
 ### WORLD [✔️]
-- Auto Buy Next World
-- Auto Buy Teleports
 - Auto Collect Food
 - Auto Collect Candy
 - Auto Collect Hidden Chests
